@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Organisation {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  plan      String   @default("free")
+  createdAt DateTime @default(now())
+
+  users      User[]
+  customers  Customer[]
+  quotations Quotation[]
+  invoices   Invoice[]
+  payments   Payment[]
+
+  @@map("organisations")
+}
+
+model User {
+  id         String   @id @default(cuid())
+  supabaseId String   @unique
+  email      String
+  name       String
+  role       String   @default("member") // owner | admin | member
+  orgId      String
+  createdAt  DateTime @default(now())
+
+  organisation Organisation @relation(fields: [orgId], references: [id])
+
+  @@map("users")
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  orgId     String
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+
+  organisation Organisation @relation(fields: [orgId], references: [id])
+  quotations   Quotation[]
+  invoices     Invoice[]
+
+  @@map("customers")
+}
+
+model Quotation {
+  id         String    @id @default(cuid())
+  orgId      String
+  customerId String
+  status     String    @default("draft") // draft | sent | accepted | rejected | expired
+  lineItems  Json
+  total      Decimal   @db.Decimal(12, 2)
+  validUntil DateTime?
+  createdAt  DateTime  @default(now())
+
+  organisation Organisation @relation(fields: [orgId], references: [id])
+  customer     Customer     @relation(fields: [customerId], references: [id])
+  invoices     Invoice[]
+
+  @@map("quotations")
+}
+
+model Invoice {
+  id          String    @id @default(cuid())
+  orgId       String
+  customerId  String
+  quotationId String?
+  status      String    @default("draft") // draft | sent | paid | overdue | cancelled
+  lineItems   Json
+  total       Decimal   @db.Decimal(12, 2)
+  dueDate     DateTime
+  createdAt   DateTime  @default(now())
+
+  organisation Organisation @relation(fields: [orgId], references: [id])
+  customer     Customer     @relation(fields: [customerId], references: [id])
+  quotation    Quotation?   @relation(fields: [quotationId], references: [id])
+  payments     Payment[]
+
+  @@map("invoices")
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  orgId     String
+  invoiceId String
+  amount    Decimal  @db.Decimal(12, 2)
+  method    String   // cash | card | eft | other
+  reference String?
+  paidAt    DateTime @default(now())
+
+  organisation Organisation @relation(fields: [orgId], references: [id])
+  invoice      Invoice      @relation(fields: [invoiceId], references: [id])
+
+  @@map("payments")
+}
