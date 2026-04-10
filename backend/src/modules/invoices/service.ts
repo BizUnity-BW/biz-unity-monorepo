@@ -7,14 +7,30 @@ function calcTotal(lineItems: LineItem[]) {
 }
 
 export function listInvoices(orgId: string) {
-  return prisma.invoice.findMany({ where: { orgId }, orderBy: { createdAt: 'desc' }, include: { customer: true } });
+  return prisma.invoice.findMany({
+    where: { orgId },
+    orderBy: { createdAt: 'desc' },
+    include: { customer: true },
+  });
 }
 
 export function getInvoice(id: string, orgId: string) {
-  return prisma.invoice.findFirst({ where: { id, orgId }, include: { customer: true, payments: true } });
+  return prisma.invoice.findFirst({
+    where: { id, orgId },
+    include: { customer: true, payments: true },
+  });
 }
 
-export function createInvoice(orgId: string, data: { customerId: string; quotationId?: string; lineItems: LineItem[]; dueDate: string; notes?: string }) {
+export function createInvoice(
+  orgId: string,
+  data: {
+    customerId: string;
+    quotationId?: string;
+    lineItems: LineItem[];
+    dueDate: string;
+    notes?: string;
+  },
+) {
   return prisma.invoice.create({
     data: {
       orgId,

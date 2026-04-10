@@ -7,14 +7,21 @@ function calcTotal(lineItems: LineItem[]) {
 }
 
 export function listQuotations(orgId: string) {
-  return prisma.quotation.findMany({ where: { orgId }, orderBy: { createdAt: 'desc' }, include: { customer: true } });
+  return prisma.quotation.findMany({
+    where: { orgId },
+    orderBy: { createdAt: 'desc' },
+    include: { customer: true },
+  });
 }
 
 export function getQuotation(id: string, orgId: string) {
   return prisma.quotation.findFirst({ where: { id, orgId }, include: { customer: true } });
 }
 
-export function createQuotation(orgId: string, data: { customerId: string; lineItems: LineItem[]; validUntil?: string; notes?: string }) {
+export function createQuotation(
+  orgId: string,
+  data: { customerId: string; lineItems: LineItem[]; validUntil?: string; notes?: string },
+) {
   return prisma.quotation.create({
     data: {
       orgId,

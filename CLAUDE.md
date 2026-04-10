@@ -6,12 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19 + TypeScript, Vite, Tailwind CSS v4 |
-| Backend | Node.js + Express + TypeScript |
-| ORM | Prisma (PostgreSQL) |
-| Validation | Zod (backend), React Hook Form + Zod (frontend) |
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS v4 |
+| Routing | React Router v7 |
+| Backend | Node.js + Express v5 + TypeScript 6 |
+| ORM | Prisma v6 (PostgreSQL) |
+| Validation | Zod v4 (backend), React Hook Form + Zod (frontend) |
 | Auth | Supabase Auth |
-| State | Zustand |
+| State | Zustand v5 |
 | Feature flags | Flagsmith |
 | Deploy | Frontend → Vercel, Backend → Render |
 
@@ -25,6 +26,8 @@ npm run dev          # start with nodemon + ts-node on :4000
 npm run build        # tsc → dist/
 npm start            # node dist/server.js
 npm run lint         # eslint src/**/*.ts
+npm run format       # prettier --write src/**/*.{ts,json}
+npm run format:check # prettier --check (used in CI)
 npm run migrate      # prisma migrate dev
 npm run migrate:deploy  # prisma migrate deploy (production)
 npm run generate     # prisma generate (after schema changes)
@@ -34,8 +37,11 @@ npm run studio       # prisma studio
 ### Frontend (`cd frontend`)
 ```bash
 npm run dev          # Vite dev server on :5173
-npm run build        # type-check + vite build → dist/
+npm run build        # tsc -b + vite build → dist/
 npm run preview      # preview production build locally
+npm run lint         # eslint
+npm run format       # prettier --write src/**/*.{ts,tsx,json}
+npm run format:check # prettier --check (used in CI)
 ```
 
 ### Local DB
@@ -87,7 +93,7 @@ All routes are mounted under `/api/v1` in `src/routes/index.ts`. Each business d
 
 ### Frontend
 
-`src/App.tsx` defines all React Router v6 routes. Protected routes check `isAuthenticated` from `useAuth` hook and redirect to `/login` otherwise.
+`src/App.tsx` defines all React Router v7 routes. Protected routes check `isAuthenticated` from `useAuth` hook and redirect to `/login` otherwise.
 
 **Key wiring:**
 - `src/store/authStore.ts` — exports the Supabase client (`supabase`) and Zustand auth store; the client is imported by `src/api/client.ts` to attach the JWT

@@ -1,7 +1,7 @@
 import { Request } from 'express';
 
 export interface AuthUser {
-  id: string;         // Supabase user id
+  id: string; // Supabase user id
   email: string;
   role: string;
 }

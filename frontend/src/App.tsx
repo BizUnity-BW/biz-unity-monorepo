@@ -24,8 +24,21 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/onboarding" element={<ProtectedRoute><CompanySetup /></ProtectedRoute>} />
-        <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute>
+              <CompanySetup />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <AppShell />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/" element={<TenantDashboard />} />
           <Route path="/customers" element={<CustomerList />} />
           <Route path="/customers/:id" element={<CustomerDetail />} />

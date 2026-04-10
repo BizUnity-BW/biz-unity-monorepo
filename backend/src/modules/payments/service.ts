@@ -1,10 +1,17 @@
 import { prisma } from '../../config/prisma';
 
 export function listPayments(orgId: string) {
-  return prisma.payment.findMany({ where: { orgId }, orderBy: { paidAt: 'desc' }, include: { invoice: true } });
+  return prisma.payment.findMany({
+    where: { orgId },
+    orderBy: { paidAt: 'desc' },
+    include: { invoice: true },
+  });
 }
 
-export function createPayment(orgId: string, data: { invoiceId: string; amount: number; method: string; reference?: string; paidAt?: string }) {
+export function createPayment(
+  orgId: string,
+  data: { invoiceId: string; amount: number; method: string; reference?: string; paidAt?: string },
+) {
   return prisma.payment.create({
     data: {
       orgId,

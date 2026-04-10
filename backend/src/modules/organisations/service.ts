@@ -1,7 +1,12 @@
 import { prisma } from '../../config/prisma';
 import { slugify } from '../../shared/utils';
 
-export async function createOrganisation(name: string, supabaseUserId: string, userEmail: string, userName: string) {
+export async function createOrganisation(
+  name: string,
+  supabaseUserId: string,
+  userEmail: string,
+  userName: string,
+) {
   const slug = slugify(name);
   return prisma.$transaction(async (tx) => {
     const org = await tx.organisation.create({

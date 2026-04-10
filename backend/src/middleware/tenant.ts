@@ -3,7 +3,11 @@ import { prisma } from '../config/prisma';
 import { AuthenticatedRequest } from '../shared/types';
 import { fail } from '../shared/utils';
 
-export async function requireTenant(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function requireTenant(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
   const authReq = req as AuthenticatedRequest;
 
   const user = await prisma.user.findUnique({

@@ -1,8 +1,14 @@
 import { z } from 'zod';
 
 export const paginationSchema = z.object({
-  page: z.string().optional().transform(v => (v ? parseInt(v, 10) : 1)),
-  limit: z.string().optional().transform(v => (v ? parseInt(v, 10) : 20)),
+  page: z
+    .string()
+    .optional()
+    .transform((v) => (v ? parseInt(v, 10) : 1)),
+  limit: z
+    .string()
+    .optional()
+    .transform((v) => (v ? parseInt(v, 10) : 20)),
 });
 
 export const uuidParam = z.object({
@@ -11,7 +17,12 @@ export const uuidParam = z.object({
 
 export const organisationSchema = z.object({
   name: z.string().min(2).max(100),
-  slug: z.string().min(2).max(50).regex(/^[a-z0-9-]+$/).optional(),
+  slug: z
+    .string()
+    .min(2)
+    .max(50)
+    .regex(/^[a-z0-9-]+$/)
+    .optional(),
 });
 
 export const customerSchema = z.object({

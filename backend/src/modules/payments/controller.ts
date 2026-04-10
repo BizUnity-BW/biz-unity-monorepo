@@ -10,6 +10,9 @@ export async function list(req: Request, res: Response): Promise<void> {
 
 export async function create(req: Request, res: Response): Promise<void> {
   const parsed = paymentSchema.safeParse(req.body);
-  if (!parsed.success) { fail(res, 'Validation failed', 422, parsed.error.flatten()); return; }
+  if (!parsed.success) {
+    fail(res, 'Validation failed', 422, parsed.error.flatten());
+    return;
+  }
   ok(res, await service.createPayment((req as AuthenticatedRequest).org.id, parsed.data), 201);
 }
