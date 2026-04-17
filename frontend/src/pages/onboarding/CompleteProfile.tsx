@@ -9,27 +9,17 @@ import { useThemeStore } from '../../store/themeStore';
 import ThemeToggle from '../../components/ui/ThemeToggle';
 
 const schema = z.object({
-  name: z.string().min(2, 'Company name must be at least 2 characters').max(100),
-  email: z.string().email('Invalid email address').optional().or(z.literal('')),
+  firstName: z.string().min(1, 'First name is required').max(100),
+  lastName: z.string().min(1, 'Last name is required').max(100),
   phone: z.string().optional(),
-  address: z.string().optional(),
-  currency: z.string().length(3),
 });
 
 type FormData = z.infer<typeof schema>;
 
-const CURRENCIES = [
-  { code: 'ZAR', label: 'ZAR — South African Rand' },
-  { code: 'BWP', label: 'BWP — Botswana Pula' },
-  { code: 'USD', label: 'USD — US Dollar' },
-  { code: 'EUR', label: 'EUR — Euro' },
-  { code: 'GBP', label: 'GBP — British Pound' },
-];
-
 const inputClass =
   'w-full bg-[var(--color-input-bg)] border border-[var(--color-input-border)] rounded-xl px-4 py-3 text-sm text-[var(--color-text)] placeholder-[var(--color-text-faint)] focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 transition-colors';
 
-export default function CompanySetup() {
+export default function CompleteProfile() {
   const navigate = useNavigate();
   const { fetchProfile } = useAuth();
   const [error, setError] = useState<string | null>(null);
@@ -40,17 +30,14 @@ export default function CompanySetup() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: { currency: 'ZAR' },
-  });
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   async function onSubmit(data: FormData) {
     setError(null);
     try {
-      await authApi.createOrganisation({ ...data, email: data.email || undefined });
+      await authApi.completeProfile(data);
       await fetchProfile();
-      navigate('/dashboard');
+      navigate('/onboarding/company');
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
@@ -60,7 +47,7 @@ export default function CompanySetup() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center px-4">
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-amber-500/8 blur-[100px]" />
       </div>
@@ -79,74 +66,43 @@ export default function CompanySetup() {
         {/* Step indicator */}
         <div className="flex items-center mb-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-3 gap-2">
           <div className="flex items-center gap-2.5 flex-1">
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-500 flex items-center justify-center flex-shrink-0">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <span className="text-sm text-[var(--color-text-faint)]">Your profile</span>
+            <div className="w-7 h-7 rounded-lg bg-amber-500 text-black text-xs font-black flex items-center justify-center flex-shrink-0">1</div>
+            <span className="text-sm font-semibold text-amber-500">Your profile</span>
           </div>
-          <div className="w-8 h-px bg-amber-500/40 flex-shrink-0" />
+          <div className="w-8 h-px bg-[var(--color-border-strong)] flex-shrink-0" />
           <div className="flex items-center gap-2.5 flex-1 justify-end">
-            <span className="text-sm font-semibold text-amber-500">Company setup</span>
-            <div className="w-7 h-7 rounded-lg bg-amber-500 text-black text-xs font-black flex items-center justify-center flex-shrink-0">2</div>
+            <span className="text-sm text-[var(--color-text-faint)]">Company setup</span>
+            <div className="w-7 h-7 rounded-lg bg-[var(--color-border)] border border-[var(--color-border-strong)] text-[var(--color-text-faint)] text-xs font-black flex items-center justify-center flex-shrink-0">2</div>
           </div>
         </div>
 
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-8">
-          <h1 className="text-xl font-bold text-[var(--color-text)] mb-1">Set up your company</h1>
-          <p className="text-sm text-[var(--color-text-muted)] mb-7">
-            This information appears on your quotations and invoices.
-          </p>
+          <h1 className="text-xl font-bold text-[var(--color-text)] mb-1">Tell us about yourself</h1>
+          <p className="text-sm text-[var(--color-text-muted)] mb-7">This helps personalise your experience.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
-                Company name
-              </label>
-              <input type="text" placeholder="Acme (Pty) Ltd" autoComplete="organization" className={inputClass} {...register('name')} />
-              {errors.name && <span className="text-red-400 text-xs">{errors.name.message}</span>}
-            </div>
-
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
-                  Company email <span className="text-[var(--color-text-faint)] normal-case font-normal">(opt.)</span>
+                  First name
                 </label>
-                <input type="email" placeholder="info@company.com" className={inputClass} {...register('email')} />
-                {errors.email && <span className="text-red-400 text-xs">{errors.email.message}</span>}
+                <input type="text" placeholder="Jane" autoComplete="given-name" className={inputClass} {...register('firstName')} />
+                {errors.firstName && <span className="text-red-400 text-xs">{errors.firstName.message}</span>}
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
-                  Phone <span className="text-[var(--color-text-faint)] normal-case font-normal">(opt.)</span>
+                  Last name
                 </label>
-                <input type="tel" placeholder="+267 71 234 567" className={inputClass} {...register('phone')} />
+                <input type="text" placeholder="Smith" autoComplete="family-name" className={inputClass} {...register('lastName')} />
+                {errors.lastName && <span className="text-red-400 text-xs">{errors.lastName.message}</span>}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
-                Address <span className="text-[var(--color-text-faint)] normal-case font-normal">(optional)</span>
+                Phone <span className="text-[var(--color-text-faint)] normal-case font-normal">(optional)</span>
               </label>
-              <textarea
-                rows={2}
-                placeholder="123 Main St, Gaborone"
-                className={`${inputClass} resize-none`}
-                {...register('address')}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
-                Currency
-              </label>
-              <select className={`${inputClass} cursor-pointer`} {...register('currency')}>
-                {CURRENCIES.map((c) => (
-                  <option key={c.code} value={c.code} className="bg-[var(--color-surface)] text-[var(--color-text)]">
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+              <input type="tel" placeholder="+267 71 234 567" autoComplete="tel" className={inputClass} {...register('phone')} />
             </div>
 
             {error && (
@@ -160,9 +116,9 @@ export default function CompanySetup() {
               disabled={isSubmitting}
               className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-amber-500/40 text-black font-bold py-3 rounded-xl text-sm transition-colors mt-2 flex items-center justify-center gap-2"
             >
-              {isSubmitting ? 'Creating…' : (
+              {isSubmitting ? 'Saving…' : (
                 <>
-                  Go to my dashboard
+                  Continue
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                   </svg>

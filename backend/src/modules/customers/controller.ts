@@ -11,7 +11,7 @@ export async function list(req: Request, res: Response): Promise<void> {
 
 export async function get(req: Request, res: Response): Promise<void> {
   const { org } = req as AuthenticatedRequest;
-  const item = await service.getCustomer(req.params.id, org.id);
+  const item = await service.getCustomer(req.params.id as string, org.id);
   if (!item) {
     fail(res, 'Not found', 404);
     return;
@@ -36,12 +36,12 @@ export async function update(req: Request, res: Response): Promise<void> {
     return;
   }
   const { org } = req as AuthenticatedRequest;
-  await service.updateCustomer(req.params.id, org.id, parsed.data);
+  await service.updateCustomer(req.params.id as string, org.id, parsed.data);
   ok(res, null);
 }
 
 export async function remove(req: Request, res: Response): Promise<void> {
   const { org } = req as AuthenticatedRequest;
-  await service.deleteCustomer(req.params.id, org.id);
+  await service.deleteCustomer(req.params.id as string, org.id);
   ok(res, null);
 }

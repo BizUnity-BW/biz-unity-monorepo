@@ -5,7 +5,10 @@ import { AuthenticatedRequest } from '../../shared/types';
 import * as service from './service';
 
 const updateSchema = z.object({
-  name: z.string().min(1).optional(),
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
+  phone: z.string().optional(),
+  avatarUrl: z.string().url().optional(),
 });
 
 export async function getMe(req: Request, res: Response): Promise<void> {

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+// ── Pagination & common ───────────────────────────────────────────────────
+
 export const paginationSchema = z.object({
   page: z
     .string()
@@ -15,48 +17,73 @@ export const uuidParam = z.object({
   id: z.string().uuid(),
 });
 
-export const organisationSchema = z.object({
-  name: z.string().min(2).max(100),
-  slug: z
-    .string()
-    .min(2)
-    .max(50)
-    .regex(/^[a-z0-9-]+$/)
-    .optional(),
+// ── Auth ──────────────────────────────────────────────────────────────────
+
+export const registerSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
-export const customerSchema = z.object({
-  name: z.string().min(1).max(200),
+export const completeProfileSchema = z.object({
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
+  phone: z.string().optional(),
+});
+
+export const createOrganisationSchema = z.object({
+  name: z.string().min(2).max(100),
   email: z.string().email().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
+  currency: z.string().length(3).optional(),
 });
+
+// ── Customers ─────────────────────────────────────────────────────────────
+
+export const customerSchema = z.object({
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  company: z.string().optional(),
+  address: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+// ── Quotations ────────────────────────────────────────────────────────────
 
 export const lineItemSchema = z.object({
   description: z.string().min(1),
   quantity: z.number().positive(),
-  unitPrice: z.number().nonnegative(),
+  unitPriceCents: z.number().int().nonnegative(),
+  taxPercent: z.number().nonnegative().default(0),
+  sortOrder: z.number().int().optional(),
 });
 
 export const quotationSchema = z.object({
-  customerId: z.string().uuid(),
-  lineItems: z.array(lineItemSchema).min(1),
-  validUntil: z.string().datetime().optional(),
+  customerId: z.string(),
+  expiryDate: z.string().datetime().optional(),
   notes: z.string().optional(),
+  items: z.array(lineItemSchema).min(1),
 });
+
+// ── Invoices ──────────────────────────────────────────────────────────────
 
 export const invoiceSchema = z.object({
-  customerId: z.string().uuid(),
-  quotationId: z.string().uuid().optional(),
-  lineItems: z.array(lineItemSchema).min(1),
-  dueDate: z.string().datetime(),
+  customerId: z.string(),
+  quotationId: z.string().optional(),
+  dueDate: z.string().datetime().optional(),
   notes: z.string().optional(),
+  items: z.array(lineItemSchema).min(1),
 });
 
+// ── Payments ──────────────────────────────────────────────────────────────
+
 export const paymentSchema = z.object({
-  invoiceId: z.string().uuid(),
-  amount: z.number().positive(),
-  method: z.enum(['cash', 'card', 'eft', 'other']),
+  invoiceId: z.string(),
+  amountCents: z.number().int().positive(),
+  method: z.enum(['CASH', 'BANK_TRANSFER', 'CARD', 'MOBILE_MONEY', 'OTHER']),
   reference: z.string().optional(),
-  paidAt: z.string().datetime().optional(),
+  notes: z.string().optional(),
+  paidAt: z.string().datetime(),
 });

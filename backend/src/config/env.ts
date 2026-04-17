@@ -10,7 +10,11 @@ const envSchema = z.object({
   DIRECT_URL: z.string().min(1),
   SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-  FLAGSMITH_ENVIRONMENT_KEY: z.string().min(1),
+  FLAGSMITH_ENVIRONMENT_KEY: z.string().optional(),
+  RATE_LIMIT_ENABLED: z
+    .string()
+    .optional()
+    .transform((v) => v !== 'false'),
 });
 
 const parsed = envSchema.safeParse(process.env);

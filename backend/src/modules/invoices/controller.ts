@@ -3,10 +3,11 @@ import { z } from 'zod';
 import { invoiceSchema } from '../../shared/validators';
 import { ok, fail } from '../../shared/utils';
 import { AuthenticatedRequest } from '../../shared/types';
+import { InvoiceStatus } from '@prisma/client';
 import * as service from './service';
 
 const statusSchema = z.object({
-  status: z.enum(['draft', 'sent', 'paid', 'overdue', 'cancelled']),
+  status: z.nativeEnum(InvoiceStatus),
 });
 
 export async function list(req: Request, res: Response): Promise<void> {
@@ -14,7 +15,10 @@ export async function list(req: Request, res: Response): Promise<void> {
 }
 
 export async function get(req: Request, res: Response): Promise<void> {
-  const item = await service.getInvoice(req.params.id, (req as AuthenticatedRequest).org.id);
+  const item = await service.getInvoice(
+    req.params.id as string,
+    (req as AuthenticatedRequest).org.id,
+  );
   if (!item) {
     fail(res, 'Not found', 404);
     return;
@@ -38,7 +42,7 @@ export async function updateStatus(req: Request, res: Response): Promise<void> {
     return;
   }
   await service.updateInvoiceStatus(
-    req.params.id,
+    req.params.id as string,
     (req as AuthenticatedRequest).org.id,
     parsed.data.status,
   );

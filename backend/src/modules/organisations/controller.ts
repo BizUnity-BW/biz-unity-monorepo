@@ -1,25 +1,8 @@
 import { Request, Response } from 'express';
-import { organisationSchema } from '../../shared/validators';
+import { createOrganisationSchema } from '../../shared/validators';
 import { ok, fail } from '../../shared/utils';
 import { AuthenticatedRequest } from '../../shared/types';
 import * as service from './service';
-
-export async function create(req: Request, res: Response): Promise<void> {
-  const parsed = organisationSchema.safeParse(req.body);
-  if (!parsed.success) {
-    fail(res, 'Validation failed', 422, parsed.error.flatten());
-    return;
-  }
-
-  const authReq = req as AuthenticatedRequest;
-  const org = await service.createOrganisation(
-    parsed.data.name,
-    authReq.user.id,
-    authReq.user.email,
-    req.body.name,
-  );
-  ok(res, org, 201);
-}
 
 export async function get(req: Request, res: Response): Promise<void> {
   const { org } = req as AuthenticatedRequest;
@@ -32,7 +15,7 @@ export async function get(req: Request, res: Response): Promise<void> {
 }
 
 export async function update(req: Request, res: Response): Promise<void> {
-  const parsed = organisationSchema.partial().safeParse(req.body);
+  const parsed = createOrganisationSchema.partial().safeParse(req.body);
   if (!parsed.success) {
     fail(res, 'Validation failed', 422, parsed.error.flatten());
     return;
