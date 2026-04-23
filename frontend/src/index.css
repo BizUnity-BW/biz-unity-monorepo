@@ -25,7 +25,7 @@ a {
   transition-timing-function: ease;
 }
 
-/* ── Design tokens — dark (default) ──────────────────────────────────────── */
+/* ── Design tokens   dark (default) ──────────────────────────────────────── */
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
@@ -46,7 +46,7 @@ a {
   --color-nav-scrolled: rgba(10, 10, 10, 0.95);
 }
 
-/* ── Design tokens — light ────────────────────────────────────────────────── */
+/* ── Design tokens   light ────────────────────────────────────────────────── */
 [data-theme="light"] {
   color-scheme: light;
   --color-bg: #f5f4f0;

@@ -14,7 +14,7 @@ const SLIDES = [
     eyebrow: 'Customer Management',
     title: 'Know every client,\nnever miss a deal.',
     subtitle:
-      'Store contacts, track history and build lasting relationships — all in one place.',
+      'Store contacts, track history and build lasting relationships   all in one place.',
   },
   {
     image: '',
@@ -38,7 +38,7 @@ const SLIDES = [
     eyebrow: 'Multi-Role Teams',
     title: 'Your team,\nyour rules.',
     subtitle:
-      'Assign owners, managers and sales roles — each with the access they need and nothing more.',
+      'Assign owners, managers and sales roles   each with the access they need and nothing more.',
   },
 ];
 
@@ -71,7 +71,7 @@ const FEATURES = [
     ),
     title: 'Payment Tracking',
     description:
-      'Record payments against invoices, flag overdue accounts and know exactly where your cash flow stands — any time.',
+      'Record payments against invoices, flag overdue accounts and know exactly where your cash flow stands   any time.',
   },
   {
     icon: (
@@ -81,7 +81,7 @@ const FEATURES = [
     ),
     title: 'Role-Based Access',
     description:
-      'Owners, managers and sales reps each get the right level of access. Your data stays yours — always isolated per organisation.',
+      'Owners, managers and sales reps each get the right level of access. Your data stays yours   always isolated per organisation.',
   },
   {
     icon: (
@@ -91,7 +91,7 @@ const FEATURES = [
     ),
     title: 'Live Dashboard',
     description:
-      'One view of your business — outstanding invoices, recent payments, top customers and pipeline at a glance.',
+      'One view of your business   outstanding invoices, recent payments, top customers and pipeline at a glance.',
   },
   {
     icon: (
@@ -101,7 +101,7 @@ const FEATURES = [
     ),
     title: 'Cloud-First, Always On',
     description:
-      'Access your business data from any device, anywhere. Deployed on enterprise infrastructure — fast, secure and always available.',
+      'Access your business data from any device, anywhere. Deployed on enterprise infrastructure   fast, secure and always available.',
   },
 ];
 
@@ -119,7 +119,7 @@ const STEPS = [
   {
     number: '03',
     title: 'Start managing',
-    description: 'Add customers, send your first quotation and track payments — all before your next meeting.',
+    description: 'Add customers, send your first quotation and track payments   all before your next meeting.',
   },
 ];
 
@@ -136,7 +136,7 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const theme = useThemeStore((s) => s.theme);
-  const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_WB.png';
+  const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_BB.png';
   const isLight = theme === 'light';
 
   // Scroll-aware nav
@@ -168,7 +168,7 @@ export default function LandingPage() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <img src={logo} alt="BizUnity" className="h-9 w-auto" />
+          <img src={logo} alt="BizUnity" className="h-30 w-auto" />
 
           <div className="hidden md:flex items-center gap-8 text-sm text-[var(--color-text-secondary)]">
             <a href="#features" className="hover:text-amber-500 transition-colors">Features</a>
@@ -224,7 +224,7 @@ export default function LandingPage() {
 
           <p className="text-lg md:text-xl text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-10 leading-relaxed">
             Manage customers, send professional quotations, issue invoices and track
-            every payment — in one platform built for the way African businesses actually work.
+            every payment   in one platform built for the way African businesses actually work.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
@@ -279,7 +279,7 @@ export default function LandingPage() {
           </h2>
         </div>
 
-        {/* Slides — always dark-themed (image backgrounds) */}
+        {/* Slides   always dark-themed (image backgrounds) */}
         <div className="relative h-[460px] md:h-[520px] overflow-hidden">
           <div
             className="flex h-full transition-transform duration-700 ease-in-out"
@@ -437,7 +437,7 @@ export default function LandingPage() {
             </h2>
             <p className="text-[var(--color-text-secondary)] text-base leading-relaxed max-w-2xl mx-auto mb-8">
               BizUnity was built because African SMEs deserve the same professional tools that global
-              enterprises use — without the complexity, the price tag, or the systems built for
+              enterprises use   without the complexity, the price tag, or the systems built for
               other markets. We start with Southern Africa and we are here to stay.
             </p>
             <Link

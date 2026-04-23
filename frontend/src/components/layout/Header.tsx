@@ -27,10 +27,10 @@ export default function Header() {
 
   return (
     <header className="h-16 border-b border-[var(--color-border)] bg-[var(--color-header)] flex items-center justify-between px-6 flex-shrink-0">
-      {/* Left — page context can be added here later */}
+      {/* Left   page context can be added here later */}
       <div />
 
-      {/* Right — theme toggle + user + sign out */}
+      {/* Right   theme toggle + user + sign out */}
       <div className="flex items-center gap-2">
         {/* Logo (small, contextual) */}
         <img src={logo} alt="BizUnity" className="h-6 w-auto opacity-60 hidden md:block mr-1" />

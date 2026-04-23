@@ -27,7 +27,7 @@ export default function Register() {
   const [success, setSuccess] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const theme = useThemeStore((s) => s.theme);
-  const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_WB.png';
+  const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_BB.png';
 
   const {
     register,
@@ -91,7 +91,7 @@ export default function Register() {
       <div className="relative w-full max-w-md">
         <div className="flex justify-center mb-8">
           <Link to="/">
-            <img src={logo} alt="BizUnity" className="h-14 w-auto" />
+            <img src={logo} alt="BizUnity" className="h-30 w-auto" />
           </Link>
         </div>
 

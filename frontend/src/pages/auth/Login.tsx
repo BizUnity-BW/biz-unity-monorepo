@@ -51,7 +51,7 @@ export default function Login() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-amber-500/8 blur-[100px]" />
       </div>
 
-      {/* Theme toggle — top right */}
+      {/* Theme toggle   top right */}
       <div className="fixed top-4 right-4 z-10">
         <ThemeToggle />
       </div>
