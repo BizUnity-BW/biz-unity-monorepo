@@ -1,19 +1,15 @@
 import { Request, Response } from 'express';
-import { z } from 'zod';
+import { prisma } from '../../config/prisma';
 import { supabaseAdmin } from '../../config/supabase';
-import { ok, fail } from '../../shared/utils';
+import { ok, fail, slugify } from '../../shared/utils';
+import { AuthenticatedRequest } from '../../shared/types';
+import {
+  registerSchema,
+  completeProfileSchema,
+  createOrganisationSchema,
+} from '../../shared/validators';
 
-const registerSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-  name: z.string().min(1),
-});
-
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-});
-
+// POST /api/v1/auth/register — public
 export async function register(req: Request, res: Response): Promise<void> {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -22,10 +18,11 @@ export async function register(req: Request, res: Response): Promise<void> {
   }
 
   const { email, password } = parsed.data;
+
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
-    email_confirm: true,
+    email_confirm: false, // TODO: set to true when email is configured
   });
 
   if (error) {
@@ -33,11 +30,107 @@ export async function register(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  ok(res, { userId: data.user.id }, 201);
+  await prisma.userProfile.create({
+    data: {
+      supabaseId: data.user.id,
+      email,
+    },
+  });
+
+  ok(res, { message: 'Check your email to confirm your account' }, 201);
 }
 
-export async function login(_req: Request, res: Response): Promise<void> {
-  // Login is handled client-side via Supabase JS SDK.
-  // This endpoint is a placeholder for any server-side login logic.
-  fail(res, 'Use the Supabase client SDK to sign in', 400);
+// POST /api/v1/auth/profile — requires auth
+export async function completeProfile(req: Request, res: Response): Promise<void> {
+  const parsed = completeProfileSchema.safeParse(req.body);
+  if (!parsed.success) {
+    fail(res, 'Validation failed', 422, parsed.error.flatten());
+    return;
+  }
+
+  const { user } = req as AuthenticatedRequest;
+
+  const profile = await prisma.userProfile.findUnique({
+    where: { supabaseId: user.id },
+  });
+
+  if (!profile) {
+    fail(res, 'Profile not found', 404);
+    return;
+  }
+
+  const updated = await prisma.userProfile.update({
+    where: { supabaseId: user.id },
+    data: parsed.data,
+  });
+
+  ok(res, updated);
+}
+
+// POST /api/v1/auth/organisation — requires auth
+export async function createOrganisation(req: Request, res: Response): Promise<void> {
+  const parsed = createOrganisationSchema.safeParse(req.body);
+  if (!parsed.success) {
+    fail(res, 'Validation failed', 422, parsed.error.flatten());
+    return;
+  }
+
+  const { user } = req as AuthenticatedRequest;
+
+  const profile = await prisma.userProfile.findUnique({
+    where: { supabaseId: user.id },
+  });
+
+  if (!profile) {
+    fail(res, 'Profile not found', 404);
+    return;
+  }
+
+  if (profile.organisationId) {
+    fail(res, 'Organisation already set up', 409);
+    return;
+  }
+
+  const { name, email, phone, address, currency } = parsed.data;
+  let slug = slugify(name);
+
+  const result = await prisma.$transaction(async (tx) => {
+    // Handle slug collisions
+    const existing = await tx.organisation.findUnique({ where: { slug } });
+    if (existing) {
+      slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
+    }
+
+    const org = await tx.organisation.create({
+      data: { name, slug, email, phone, address, currency: currency ?? 'ZAR' },
+    });
+
+    const updatedProfile = await tx.userProfile.update({
+      where: { supabaseId: user.id },
+      data: { organisationId: org.id, orgRole: 'OWNER' },
+    });
+
+    return { org, profile: updatedProfile };
+  });
+
+  ok(res, { organisation: result.org, profile: result.profile }, 201);
+}
+
+// GET /api/v1/auth/me — requires auth
+export async function getMe(req: Request, res: Response): Promise<void> {
+  const { user } = req as AuthenticatedRequest;
+
+  const profile = await prisma.userProfile.findUnique({
+    where: { supabaseId: user.id },
+    include: { organisation: true },
+  });
+
+  if (!profile) {
+    fail(res, 'Profile not found', 404);
+    return;
+  }
+
+  const { organisation, ...profileData } = profile;
+
+  ok(res, { profile: profileData, organisation: organisation ?? null });
 }

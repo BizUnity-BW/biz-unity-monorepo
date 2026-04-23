@@ -8,99 +8,218 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Organisation {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  plan      String   @default("free")
-  createdAt DateTime @default(now())
+// ── Enums ──────────────────────────────────────────────────────────────────
 
-  users      User[]
-  customers  Customer[]
-  quotations Quotation[]
-  invoices   Invoice[]
-  payments   Payment[]
+enum OrgRole {
+  OWNER
+  MANAGER
+  SALES
+}
+
+enum SystemRole {
+  SYSTEM_ADMIN
+  SYSTEM_USER
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CONVERTED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  MOBILE_MONEY
+  OTHER
+}
+
+// ── Models ─────────────────────────────────────────────────────────────────
+
+model Organisation {
+  id         String    @id @default(cuid())
+  name       String
+  slug       String    @unique
+  email      String?
+  phone      String?
+  address    String?
+  logoUrl    String?
+  vatNumber  String?
+  currency   String    @default("ZAR")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  userProfiles UserProfile[]
+  customers    Customer[]
+  quotations   Quotation[]
+  invoices     Invoice[]
 
   @@map("organisations")
 }
 
-model User {
-  id         String   @id @default(cuid())
-  supabaseId String   @unique
-  email      String
-  name       String
-  role       String   @default("member") // owner | admin | member
-  orgId      String
-  createdAt  DateTime @default(now())
+model UserProfile {
+  id             String     @id @default(cuid())
+  supabaseId     String     @unique
+  email          String     @unique
+  firstName      String?
+  lastName       String?
+  phone          String?
+  avatarUrl      String?
+  systemRole     SystemRole @default(SYSTEM_USER)
+  orgRole        OrgRole    @default(SALES)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
-  organisation Organisation @relation(fields: [orgId], references: [id])
+  organisationId String?
+  organisation   Organisation? @relation(fields: [organisationId], references: [id])
 
-  @@map("users")
+  payments Payment[] @relation("RecordedBy")
+
+  @@map("user_profiles")
 }
 
 model Customer {
-  id        String   @id @default(cuid())
-  orgId     String
-  name      String
-  email     String?
-  phone     String?
-  address   String?
-  createdAt DateTime @default(now())
+  id             String    @id @default(cuid())
+  firstName      String
+  lastName       String
+  email          String?
+  phone          String?
+  company        String?
+  address        String?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
 
-  organisation Organisation @relation(fields: [orgId], references: [id])
-  quotations   Quotation[]
-  invoices     Invoice[]
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
 
+  quotations Quotation[]
+  invoices   Invoice[]
+
+  @@index([organisationId])
   @@map("customers")
 }
 
 model Quotation {
-  id         String    @id @default(cuid())
-  orgId      String
+  id             String          @id @default(cuid())
+  number         String
+  status         QuotationStatus @default(DRAFT)
+  issueDate      DateTime        @default(now())
+  expiryDate     DateTime?
+  notes          String?
+  subtotalCents  Int             @default(0)
+  taxCents       Int             @default(0)
+  totalCents     Int             @default(0)
+  convertedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+
   customerId String
-  status     String    @default("draft") // draft | sent | accepted | rejected | expired
-  lineItems  Json
-  total      Decimal   @db.Decimal(12, 2)
-  validUntil DateTime?
-  createdAt  DateTime  @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id])
 
-  organisation Organisation @relation(fields: [orgId], references: [id])
-  customer     Customer     @relation(fields: [customerId], references: [id])
-  invoices     Invoice[]
+  items   QuotationItem[]
+  invoice Invoice?
 
+  @@unique([organisationId, number])
+  @@index([organisationId])
   @@map("quotations")
 }
 
+model QuotationItem {
+  id             String @id @default(cuid())
+  description    String
+  quantity       Decimal
+  unitPriceCents Int
+  taxPercent     Decimal @default(0)
+  totalCents     Int
+  sortOrder      Int     @default(0)
+
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  @@map("quotation_items")
+}
+
 model Invoice {
-  id          String    @id @default(cuid())
-  orgId       String
-  customerId  String
-  quotationId String?
-  status      String    @default("draft") // draft | sent | paid | overdue | cancelled
-  lineItems   Json
-  total       Decimal   @db.Decimal(12, 2)
-  dueDate     DateTime
-  createdAt   DateTime  @default(now())
+  id            String        @id @default(cuid())
+  number        String
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime      @default(now())
+  dueDate       DateTime?
+  notes         String?
+  subtotalCents Int           @default(0)
+  taxCents      Int           @default(0)
+  totalCents    Int           @default(0)
+  paidCents     Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
 
-  organisation Organisation @relation(fields: [orgId], references: [id])
-  customer     Customer     @relation(fields: [customerId], references: [id])
-  quotation    Quotation?   @relation(fields: [quotationId], references: [id])
-  payments     Payment[]
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
 
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  quotationId String?   @unique
+  quotation   Quotation? @relation(fields: [quotationId], references: [id])
+
+  items    InvoiceItem[]
+  payments Payment[]
+
+  @@unique([organisationId, number])
+  @@index([organisationId])
   @@map("invoices")
 }
 
-model Payment {
-  id        String   @id @default(cuid())
-  orgId     String
+model InvoiceItem {
+  id             String  @id @default(cuid())
+  description    String
+  quantity       Decimal
+  unitPriceCents Int
+  taxPercent     Decimal @default(0)
+  totalCents     Int
+  sortOrder      Int     @default(0)
+
   invoiceId String
-  amount    Decimal  @db.Decimal(12, 2)
-  method    String   // cash | card | eft | other
-  reference String?
-  paidAt    DateTime @default(now())
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
-  organisation Organisation @relation(fields: [orgId], references: [id])
-  invoice      Invoice      @relation(fields: [invoiceId], references: [id])
+  @@map("invoice_items")
+}
 
+model Payment {
+  id          String        @id @default(cuid())
+  amountCents Int
+  method      PaymentMethod
+  reference   String?
+  notes       String?
+  paidAt      DateTime
+  createdAt   DateTime      @default(now())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id])
+
+  recordedById String?
+  recordedBy   UserProfile? @relation("RecordedBy", fields: [recordedById], references: [id])
+
+  @@index([invoiceId])
   @@map("payments")
 }

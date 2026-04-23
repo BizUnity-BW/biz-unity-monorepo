@@ -1,16 +1,36 @@
-import { useEffect } from 'react';
-import { supabase, useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../store/authStore';
+import { authApi } from '../api/auth';
 
 export function useAuth() {
-  const { user, session, setSession, signOut } = useAuthStore();
+  const store = useAuthStore();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-    return () => listener.subscription.unsubscribe();
-  }, [setSession]);
+  async function fetchProfile() {
+    // Bail out if a fetch is already in flight
+    if (useAuthStore.getState().profileLoading) return;
 
-  return { user, session, signOut, isAuthenticated: !!session };
+    store.setProfileLoading(true);
+    try {
+      const res = await authApi.getMe();
+      store.setProfile(res.data.data.profile);
+      store.setOrganisation(res.data.data.organisation);
+    } catch {
+      store.setProfile(null);
+      store.setOrganisation(null);
+    } finally {
+      store.setProfileLoading(false);
+    }
+  }
+
+  return {
+    user: store.user,
+    session: store.session,
+    profile: store.profile,
+    organisation: store.organisation,
+    profileLoading: store.profileLoading,
+    isAuthenticated: !!store.session,
+    isProfileComplete: !!store.profile?.firstName && !!store.profile?.lastName,
+    hasOrganisation: !!store.profile?.organisationId,
+    fetchProfile,
+    signOut: store.signOut,
+  };
 }
