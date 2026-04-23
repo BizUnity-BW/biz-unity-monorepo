@@ -1,9 +1,15 @@
 import { prisma } from '../../config/prisma';
 
 export function getUserBySupabaseId(supabaseId: string) {
-  return prisma.user.findUnique({ where: { supabaseId }, include: { organisation: true } });
+  return prisma.userProfile.findUnique({
+    where: { supabaseId },
+    include: { organisation: true },
+  });
 }
 
-export function updateUser(supabaseId: string, data: Partial<{ name: string; email: string }>) {
-  return prisma.user.update({ where: { supabaseId }, data });
+export function updateUser(
+  supabaseId: string,
+  data: Partial<{ firstName: string; lastName: string; phone: string; avatarUrl: string }>,
+) {
+  return prisma.userProfile.update({ where: { supabaseId }, data });
 }

@@ -21,7 +21,8 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   (req as AuthenticatedRequest).user = {
     id: data.user.id,
     email: data.user.email ?? '',
-    role: (data.user.app_metadata?.role as string) ?? 'member',
+    systemRole:
+      (data.user.app_metadata?.system_role as 'SYSTEM_ADMIN' | 'SYSTEM_USER') ?? 'SYSTEM_USER',
   };
 
   next();
