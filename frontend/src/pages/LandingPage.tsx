@@ -4,12 +4,10 @@ import { useThemeStore } from '../store/themeStore';
 import ThemeToggle from '../components/ui/ThemeToggle';
 
 // ─── Slider data ───────────────────────────────────────────────────────────────
-// Replace `image` paths with your own photos placed in /public/slides/
-// e.g. image: '/slides/market-stall.jpg'
-// Leave image as '' to use the gradient fallback.
+
 const SLIDES = [
   {
-    image: '',
+    image: '../../public/slides/catering.jpg',
     gradient: 'from-[#1a0a00] via-[#2d1500] to-[#0a0a0a]',
     eyebrow: 'Customer Management',
     title: 'Know every client,\nnever miss a deal.',
@@ -17,7 +15,7 @@ const SLIDES = [
       'Store contacts, track history and build lasting relationships   all in one place.',
   },
   {
-    image: '',
+    image: '../../public/slides/cows.jpg',
     gradient: 'from-[#000d1a] via-[#001933] to-[#0a0a0a]',
     eyebrow: 'Quotations & Invoicing',
     title: 'Send professional\ndocuments in seconds.',
@@ -25,7 +23,7 @@ const SLIDES = [
       'Create branded quotations, convert them to invoices and get paid faster.',
   },
   {
-    image: '',
+    image: '../../public/slides/disenke.jpg',
     gradient: 'from-[#0a1a00] via-[#0d2600] to-[#0a0a0a]',
     eyebrow: 'Payment Tracking',
     title: 'Every payment.\nAccounted for.',
@@ -33,7 +31,7 @@ const SLIDES = [
       'Log payments against invoices, monitor outstanding balances and close your books with confidence.',
   },
   {
-    image: '',
+    image: '../../public/slides/driedfood.jpg',
     gradient: 'from-[#1a0010] via-[#26001a] to-[#0a0a0a]',
     eyebrow: 'Multi-Role Teams',
     title: 'Your team,\nyour rules.',
@@ -353,10 +351,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Slider note */}
-        <p className="text-center text-xs text-[var(--color-text-faintest)] mt-4 pb-4 max-w-7xl mx-auto px-6">
-          Add your own SME photos by placing images in <code className="text-[var(--color-text-faint)]">/public/slides/</code> and updating the <code className="text-[var(--color-text-faint)]">SLIDES</code> array in <code className="text-[var(--color-text-faint)]">LandingPage.tsx</code>
-        </p>
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────────── */}
@@ -375,9 +369,9 @@ export default function LandingPage() {
             {FEATURES.map((f) => (
               <div
                 key={f.title}
-                className="group bg-[var(--color-surface)] border border-[var(--color-border-subtle)] rounded-2xl p-7 hover:border-amber-500/30 hover:bg-[var(--color-surface-hover)] transition-all duration-300"
+                className="group bg-[var(--color-surface)]  rounded-2xl p-7 hover:border-amber-500/30 hover:bg-[var(--color-surface-hover)] transition-all duration-300"
               >
-                <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center mb-5 group-hover:bg-amber-500/20 transition-colors">
+                <div className="w-11 h-11 rounded-xl bg-amber-500/10  text-amber-500 flex items-center justify-center mb-5 group-hover:bg-amber-500/20 transition-colors">
                   {f.icon}
                 </div>
                 <h3 className="text-[var(--color-text)] font-semibold text-base mb-2">{f.title}</h3>

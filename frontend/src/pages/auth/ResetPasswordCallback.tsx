@@ -27,7 +27,7 @@ export default function ResetPasswordCallback() {
   const [ready, setReady] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const theme = useThemeStore((s) => s.theme);
-  const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_WB.png';
+  const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_BB.png';
 
   const {
     register,
