@@ -27,7 +27,7 @@ export default function ResetPasswordCallback() {
   const [ready, setReady] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const theme = useThemeStore((s) => s.theme);
-  const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_WB.png';
+  const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_BB.png';
 
   const {
     register,
@@ -77,7 +77,7 @@ export default function ResetPasswordCallback() {
 
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-8">
           <h1 className="text-xl font-bold text-[var(--color-text)] mb-1">Choose a new password</h1>
-          <p className="text-sm text-[var(--color-text-muted)] mb-7">Make it strong — at least 8 characters.</p>
+          <p className="text-sm text-[var(--color-text-muted)] mb-7">Make it strong   at least 8 characters.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
