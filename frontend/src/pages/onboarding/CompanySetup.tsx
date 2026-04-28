@@ -19,11 +19,11 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const CURRENCIES = [
-  { code: 'ZAR', label: 'ZAR — South African Rand' },
-  { code: 'BWP', label: 'BWP — Botswana Pula' },
-  { code: 'USD', label: 'USD — US Dollar' },
-  { code: 'EUR', label: 'EUR — Euro' },
-  { code: 'GBP', label: 'GBP — British Pound' },
+  { code: 'ZAR', label: 'ZAR   South African Rand' },
+  { code: 'BWP', label: 'BWP   Botswana Pula' },
+  { code: 'USD', label: 'USD   US Dollar' },
+  { code: 'EUR', label: 'EUR   Euro' },
+  { code: 'GBP', label: 'GBP   British Pound' },
 ];
 
 const inputClass =
