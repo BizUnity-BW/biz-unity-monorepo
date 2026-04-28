@@ -23,7 +23,7 @@ export default function Login() {
   const passwordReset = searchParams.get('reset') === 'success';
   const [authError, setAuthError] = useState<string | null>(null);
   const theme = useThemeStore((s) => s.theme);
-  const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_WB.png';
+  const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_BB.png';
 
   const {
     register,
@@ -51,16 +51,16 @@ export default function Login() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-amber-500/8 blur-[100px]" />
       </div>
 
-      {/* Theme toggle — top right */}
+      {/* Theme toggle   top right */}
       <div className="fixed top-4 right-4 z-10">
         <ThemeToggle />
       </div>
 
       <div className="relative w-full max-w-md">
         {/* Logo */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-2">
           <Link to="/">
-            <img src={logo} alt="BizUnity" className="h-14 w-auto" />
+            <img src={logo} alt="BizUnity" className="h-28 w-auto" />
           </Link>
         </div>
 

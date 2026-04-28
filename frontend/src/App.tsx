@@ -27,7 +27,7 @@ const Spinner = () => (
   </div>
 );
 
-// Public landing page — redirects to /dashboard if already signed in
+// Public landing page   redirects to /dashboard if already signed in
 function RootRoute() {
   const { isAuthenticated, profileLoading } = useAuth();
   if (profileLoading) return <Spinner />;
@@ -96,11 +96,11 @@ export default function App() {
         <Route path="/forgot-password" element={<AuthRoute><ForgotPassword /></AuthRoute>} />
         <Route path="/reset-password" element={<ResetPasswordCallback />} />
 
-        {/* Onboarding — auth required, but NOT behind ProfileGuard */}
+        {/* Onboarding   auth required, but NOT behind ProfileGuard */}
         <Route path="/onboarding/profile" element={<OnboardingRoute><CompleteProfile /></OnboardingRoute>} />
         <Route path="/onboarding/company" element={<OnboardingRoute><CompanySetup /></OnboardingRoute>} />
 
-        {/* App — auth + onboarding required */}
+        {/* App   auth + onboarding required */}
         <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
           <Route path="/dashboard" element={<TenantDashboard />} />
           <Route path="/customers" element={<CustomerList />} />

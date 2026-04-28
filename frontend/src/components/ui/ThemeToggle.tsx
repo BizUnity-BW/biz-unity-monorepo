@@ -16,7 +16,7 @@ export default function ThemeToggle({ className = '' }: Props) {
       className={`w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] transition-colors ${className}`}
     >
       {isDark ? (
-        /* Sun — visible in dark mode, click to go light */
+        /* Sun   visible in dark mode, click to go light */
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
           <path
             strokeLinecap="round"
@@ -25,7 +25,7 @@ export default function ThemeToggle({ className = '' }: Props) {
           />
         </svg>
       ) : (
-        /* Moon — visible in light mode, click to go dark */
+        /* Moon   visible in light mode, click to go dark */
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
           <path
             strokeLinecap="round"
