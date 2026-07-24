@@ -79,7 +79,13 @@ export default function InvoiceDetail() {
         to="/invoices"
         className="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
       >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
         </svg>
         Back to invoices
@@ -144,10 +150,18 @@ export default function InvoiceDetail() {
                 {(invoice.items ?? []).map((it) => (
                   <tr key={it.id} className="border-t border-[var(--color-border-subtle)]">
                     <td className="px-4 py-3 text-[var(--color-text)]">{it.description}</td>
-                    <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">{Number(it.quantity)}</td>
-                    <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">{formatMoney(it.unitPriceCents, currency)}</td>
-                    <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">{Number(it.taxPercent)}%</td>
-                    <td className="px-4 py-3 text-right text-[var(--color-text)]">{formatMoney(it.totalCents, currency)}</td>
+                    <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">
+                      {Number(it.quantity)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">
+                      {formatMoney(it.unitPriceCents, currency)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">
+                      {Number(it.taxPercent)}%
+                    </td>
+                    <td className="px-4 py-3 text-right text-[var(--color-text)]">
+                      {formatMoney(it.totalCents, currency)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -224,7 +238,9 @@ export default function InvoiceDetail() {
 
 function Row({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
   return (
-    <div className={`flex justify-between py-1 ${muted ? 'text-[var(--color-text-muted)]' : 'text-[var(--color-text-secondary)]'}`}>
+    <div
+      className={`flex justify-between py-1 ${muted ? 'text-[var(--color-text-muted)]' : 'text-[var(--color-text-secondary)]'}`}
+    >
       <span>{label}</span>
       <span>{value}</span>
     </div>
@@ -329,7 +345,8 @@ function RecordPaymentModal({
           </div>
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>
-              Reference <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
+              Reference{' '}
+              <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
             </label>
             <input
               className={inputClass}

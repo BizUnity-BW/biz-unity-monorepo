@@ -67,7 +67,9 @@ export default function Login() {
         {/* Card */}
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-8">
           <h1 className="text-xl font-bold text-[var(--color-text)] mb-1">Welcome back</h1>
-          <p className="text-sm text-[var(--color-text-muted)] mb-7">Sign in to your BizUnity account</p>
+          <p className="text-sm text-[var(--color-text-muted)] mb-7">
+            Sign in to your BizUnity account
+          </p>
 
           {passwordReset && (
             <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-sm rounded-xl px-4 py-3 mb-5">
@@ -80,7 +82,13 @@ export default function Login() {
               <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
                 Email address
               </label>
-              <input type="email" placeholder="you@example.com" autoComplete="email" className={inputClass} {...register('email')} />
+              <input
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                className={inputClass}
+                {...register('email')}
+              />
               {errors.email && <span className="text-red-400 text-xs">{errors.email.message}</span>}
             </div>
 
@@ -89,12 +97,23 @@ export default function Login() {
                 <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
                   Password
                 </label>
-                <Link to="/forgot-password" className="text-xs text-amber-500/80 hover:text-amber-500 transition-colors">
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-amber-500/80 hover:text-amber-500 transition-colors"
+                >
                   Forgot password?
                 </Link>
               </div>
-              <input type="password" placeholder="••••••••" autoComplete="current-password" className={inputClass} {...register('password')} />
-              {errors.password && <span className="text-red-400 text-xs">{errors.password.message}</span>}
+              <input
+                type="password"
+                placeholder="••••••••"
+                autoComplete="current-password"
+                className={inputClass}
+                {...register('password')}
+              />
+              {errors.password && (
+                <span className="text-red-400 text-xs">{errors.password.message}</span>
+              )}
             </div>
 
             {authError && (
@@ -115,7 +134,10 @@ export default function Login() {
 
         <p className="text-center text-sm text-[var(--color-text-muted)] mt-6">
           Don&apos;t have an account?{' '}
-          <Link to="/register" className="text-amber-500 hover:text-amber-400 font-medium transition-colors">
+          <Link
+            to="/register"
+            className="text-amber-500 hover:text-amber-400 font-medium transition-colors"
+          >
             Create one free
           </Link>
         </p>

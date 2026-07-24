@@ -66,19 +66,27 @@ export default function CompleteProfile() {
         {/* Step indicator */}
         <div className="flex items-center mb-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-3 gap-2">
           <div className="flex items-center gap-2.5 flex-1">
-            <div className="w-7 h-7 rounded-lg bg-amber-500 text-black text-xs font-black flex items-center justify-center flex-shrink-0">1</div>
+            <div className="w-7 h-7 rounded-lg bg-amber-500 text-black text-xs font-black flex items-center justify-center flex-shrink-0">
+              1
+            </div>
             <span className="text-sm font-semibold text-amber-500">Your profile</span>
           </div>
           <div className="w-8 h-px bg-[var(--color-border-strong)] flex-shrink-0" />
           <div className="flex items-center gap-2.5 flex-1 justify-end">
             <span className="text-sm text-[var(--color-text-faint)]">Company setup</span>
-            <div className="w-7 h-7 rounded-lg bg-[var(--color-border)] border border-[var(--color-border-strong)] text-[var(--color-text-faint)] text-xs font-black flex items-center justify-center flex-shrink-0">2</div>
+            <div className="w-7 h-7 rounded-lg bg-[var(--color-border)] border border-[var(--color-border-strong)] text-[var(--color-text-faint)] text-xs font-black flex items-center justify-center flex-shrink-0">
+              2
+            </div>
           </div>
         </div>
 
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-8">
-          <h1 className="text-xl font-bold text-[var(--color-text)] mb-1">Tell us about yourself</h1>
-          <p className="text-sm text-[var(--color-text-muted)] mb-7">This helps personalise your experience.</p>
+          <h1 className="text-xl font-bold text-[var(--color-text)] mb-1">
+            Tell us about yourself
+          </h1>
+          <p className="text-sm text-[var(--color-text-muted)] mb-7">
+            This helps personalise your experience.
+          </p>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-3">
@@ -86,23 +94,48 @@ export default function CompleteProfile() {
                 <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
                   First name
                 </label>
-                <input type="text" placeholder="Jane" autoComplete="given-name" className={inputClass} {...register('firstName')} />
-                {errors.firstName && <span className="text-red-400 text-xs">{errors.firstName.message}</span>}
+                <input
+                  type="text"
+                  placeholder="Jane"
+                  autoComplete="given-name"
+                  className={inputClass}
+                  {...register('firstName')}
+                />
+                {errors.firstName && (
+                  <span className="text-red-400 text-xs">{errors.firstName.message}</span>
+                )}
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
                   Last name
                 </label>
-                <input type="text" placeholder="Smith" autoComplete="family-name" className={inputClass} {...register('lastName')} />
-                {errors.lastName && <span className="text-red-400 text-xs">{errors.lastName.message}</span>}
+                <input
+                  type="text"
+                  placeholder="Smith"
+                  autoComplete="family-name"
+                  className={inputClass}
+                  {...register('lastName')}
+                />
+                {errors.lastName && (
+                  <span className="text-red-400 text-xs">{errors.lastName.message}</span>
+                )}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
-                Phone <span className="text-[var(--color-text-faint)] normal-case font-normal">(optional)</span>
+                Phone{' '}
+                <span className="text-[var(--color-text-faint)] normal-case font-normal">
+                  (optional)
+                </span>
               </label>
-              <input type="tel" placeholder="+267 71 234 567" autoComplete="tel" className={inputClass} {...register('phone')} />
+              <input
+                type="tel"
+                placeholder="+267 71 234 567"
+                autoComplete="tel"
+                className={inputClass}
+                {...register('phone')}
+              />
             </div>
 
             {error && (
@@ -116,11 +149,23 @@ export default function CompleteProfile() {
               disabled={isSubmitting}
               className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-amber-500/40 text-black font-bold py-3 rounded-xl text-sm transition-colors mt-2 flex items-center justify-center gap-2"
             >
-              {isSubmitting ? 'Saving…' : (
+              {isSubmitting ? (
+                'Saving…'
+              ) : (
                 <>
                   Continue
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                    />
                   </svg>
                 </>
               )}

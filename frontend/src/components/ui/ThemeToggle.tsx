@@ -17,7 +17,13 @@ export default function ThemeToggle({ className = '' }: Props) {
     >
       {isDark ? (
         /* Sun   visible in dark mode, click to go light */
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={1.75}
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -26,7 +32,13 @@ export default function ThemeToggle({ className = '' }: Props) {
         </svg>
       ) : (
         /* Moon   visible in light mode, click to go dark */
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={1.75}
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"

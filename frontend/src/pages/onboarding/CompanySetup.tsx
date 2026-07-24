@@ -80,7 +80,13 @@ export default function CompanySetup() {
         <div className="flex items-center mb-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-3 gap-2">
           <div className="flex items-center gap-2.5 flex-1">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-500 flex items-center justify-center flex-shrink-0">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -89,7 +95,9 @@ export default function CompanySetup() {
           <div className="w-8 h-px bg-amber-500/40 flex-shrink-0" />
           <div className="flex items-center gap-2.5 flex-1 justify-end">
             <span className="text-sm font-semibold text-amber-500">Company setup</span>
-            <div className="w-7 h-7 rounded-lg bg-amber-500 text-black text-xs font-black flex items-center justify-center flex-shrink-0">2</div>
+            <div className="w-7 h-7 rounded-lg bg-amber-500 text-black text-xs font-black flex items-center justify-center flex-shrink-0">
+              2
+            </div>
           </div>
         </div>
 
@@ -104,29 +112,56 @@ export default function CompanySetup() {
               <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
                 Company name
               </label>
-              <input type="text" placeholder="Acme (Pty) Ltd" autoComplete="organization" className={inputClass} {...register('name')} />
+              <input
+                type="text"
+                placeholder="Acme (Pty) Ltd"
+                autoComplete="organization"
+                className={inputClass}
+                {...register('name')}
+              />
               {errors.name && <span className="text-red-400 text-xs">{errors.name.message}</span>}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
-                  Company email <span className="text-[var(--color-text-faint)] normal-case font-normal">(opt.)</span>
+                  Company email{' '}
+                  <span className="text-[var(--color-text-faint)] normal-case font-normal">
+                    (opt.)
+                  </span>
                 </label>
-                <input type="email" placeholder="info@company.com" className={inputClass} {...register('email')} />
-                {errors.email && <span className="text-red-400 text-xs">{errors.email.message}</span>}
+                <input
+                  type="email"
+                  placeholder="info@company.com"
+                  className={inputClass}
+                  {...register('email')}
+                />
+                {errors.email && (
+                  <span className="text-red-400 text-xs">{errors.email.message}</span>
+                )}
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
-                  Phone <span className="text-[var(--color-text-faint)] normal-case font-normal">(opt.)</span>
+                  Phone{' '}
+                  <span className="text-[var(--color-text-faint)] normal-case font-normal">
+                    (opt.)
+                  </span>
                 </label>
-                <input type="tel" placeholder="+267 71 234 567" className={inputClass} {...register('phone')} />
+                <input
+                  type="tel"
+                  placeholder="+267 71 234 567"
+                  className={inputClass}
+                  {...register('phone')}
+                />
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
-                Address <span className="text-[var(--color-text-faint)] normal-case font-normal">(optional)</span>
+                Address{' '}
+                <span className="text-[var(--color-text-faint)] normal-case font-normal">
+                  (optional)
+                </span>
               </label>
               <textarea
                 rows={2}
@@ -142,7 +177,11 @@ export default function CompanySetup() {
               </label>
               <select className={`${inputClass} cursor-pointer`} {...register('currency')}>
                 {CURRENCIES.map((c) => (
-                  <option key={c.code} value={c.code} className="bg-[var(--color-surface)] text-[var(--color-text)]">
+                  <option
+                    key={c.code}
+                    value={c.code}
+                    className="bg-[var(--color-surface)] text-[var(--color-text)]"
+                  >
                     {c.label}
                   </option>
                 ))}
@@ -160,11 +199,23 @@ export default function CompanySetup() {
               disabled={isSubmitting}
               className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-amber-500/40 text-black font-bold py-3 rounded-xl text-sm transition-colors mt-2 flex items-center justify-center gap-2"
             >
-              {isSubmitting ? 'Creating…' : (
+              {isSubmitting ? (
+                'Creating…'
+              ) : (
                 <>
                   Go to my dashboard
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                    />
                   </svg>
                 </>
               )}

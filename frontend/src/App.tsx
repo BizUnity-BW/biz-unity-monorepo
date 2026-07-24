@@ -91,17 +91,58 @@ export default function App() {
         <Route path="/" element={<RootRoute />} />
 
         {/* Public auth routes */}
-        <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
-        <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
-        <Route path="/forgot-password" element={<AuthRoute><ForgotPassword /></AuthRoute>} />
+        <Route
+          path="/login"
+          element={
+            <AuthRoute>
+              <Login />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <AuthRoute>
+              <Register />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <AuthRoute>
+              <ForgotPassword />
+            </AuthRoute>
+          }
+        />
         <Route path="/reset-password" element={<ResetPasswordCallback />} />
 
         {/* Onboarding   auth required, but NOT behind ProfileGuard */}
-        <Route path="/onboarding/profile" element={<OnboardingRoute><CompleteProfile /></OnboardingRoute>} />
-        <Route path="/onboarding/company" element={<OnboardingRoute><CompanySetup /></OnboardingRoute>} />
+        <Route
+          path="/onboarding/profile"
+          element={
+            <OnboardingRoute>
+              <CompleteProfile />
+            </OnboardingRoute>
+          }
+        />
+        <Route
+          path="/onboarding/company"
+          element={
+            <OnboardingRoute>
+              <CompanySetup />
+            </OnboardingRoute>
+          }
+        />
 
         {/* App   auth + onboarding required */}
-        <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
+        <Route
+          element={
+            <ProtectedRoute>
+              <AppShell />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/dashboard" element={<TenantDashboard />} />
           <Route path="/customers" element={<CustomerList />} />
           <Route path="/customers/:id" element={<CustomerDetail />} />

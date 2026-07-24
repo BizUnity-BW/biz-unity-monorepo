@@ -45,7 +45,10 @@ export default function ResetPasswordCallback() {
   async function onSubmit(data: FormData) {
     setSubmitError(null);
     const { error } = await supabase.auth.updateUser({ password: data.newPassword });
-    if (error) { setSubmitError(error.message); return; }
+    if (error) {
+      setSubmitError(error.message);
+      return;
+    }
     await supabase.auth.signOut();
     navigate('/login?reset=success');
   }
@@ -77,23 +80,41 @@ export default function ResetPasswordCallback() {
 
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-8">
           <h1 className="text-xl font-bold text-[var(--color-text)] mb-1">Choose a new password</h1>
-          <p className="text-sm text-[var(--color-text-muted)] mb-7">Make it strong   at least 8 characters.</p>
+          <p className="text-sm text-[var(--color-text-muted)] mb-7">
+            Make it strong at least 8 characters.
+          </p>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
                 New password
               </label>
-              <input type="password" placeholder="Min. 8 characters" autoComplete="new-password" className={inputClass} {...register('newPassword')} />
-              {errors.newPassword && <span className="text-red-400 text-xs">{errors.newPassword.message}</span>}
+              <input
+                type="password"
+                placeholder="Min. 8 characters"
+                autoComplete="new-password"
+                className={inputClass}
+                {...register('newPassword')}
+              />
+              {errors.newPassword && (
+                <span className="text-red-400 text-xs">{errors.newPassword.message}</span>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
                 Confirm new password
               </label>
-              <input type="password" placeholder="••••••••" autoComplete="new-password" className={inputClass} {...register('confirmPassword')} />
-              {errors.confirmPassword && <span className="text-red-400 text-xs">{errors.confirmPassword.message}</span>}
+              <input
+                type="password"
+                placeholder="••••••••"
+                autoComplete="new-password"
+                className={inputClass}
+                {...register('confirmPassword')}
+              />
+              {errors.confirmPassword && (
+                <span className="text-red-400 text-xs">{errors.confirmPassword.message}</span>
+              )}
             </div>
 
             {submitError && (
@@ -113,7 +134,10 @@ export default function ResetPasswordCallback() {
         </div>
 
         <p className="text-center text-sm text-[var(--color-text-muted)] mt-6">
-          <Link to="/login" className="text-amber-500 hover:text-amber-400 font-medium transition-colors">
+          <Link
+            to="/login"
+            className="text-amber-500 hover:text-amber-400 font-medium transition-colors"
+          >
             Back to sign in
           </Link>
         </p>

@@ -80,7 +80,13 @@ export default function QuotationList() {
           onClick={() => navigate('/quotations/new')}
           className="flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-black transition-colors hover:bg-amber-400"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2.5}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
           New quotation
@@ -103,7 +109,9 @@ export default function QuotationList() {
       )}
 
       {loading ? (
-        <div className="py-16 text-center text-sm text-[var(--color-text-muted)]">Loading quotations…</div>
+        <div className="py-16 text-center text-sm text-[var(--color-text-muted)]">
+          Loading quotations…
+        </div>
       ) : quotations.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--color-border)] py-16 text-center">
           <h3 className="text-base font-semibold text-[var(--color-text)]">No quotations yet</h3>

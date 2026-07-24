@@ -23,6 +23,9 @@ export function formatDate(iso: string | null | undefined): string {
 }
 
 /** Extract a human-readable message from an axios-style error. */
-export function errMessage(err: unknown, fallback = 'Something went wrong. Please try again.'): string {
+export function errMessage(
+  err: unknown,
+  fallback = 'Something went wrong. Please try again.',
+): string {
   return (err as { response?: { data?: { error?: string } } })?.response?.data?.error ?? fallback;
 }

@@ -47,13 +47,7 @@ export interface Customer {
 }
 
 export type QuotationStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | 'CONVERTED';
-export type InvoiceStatus =
-  | 'DRAFT'
-  | 'SENT'
-  | 'PARTIALLY_PAID'
-  | 'PAID'
-  | 'OVERDUE'
-  | 'CANCELLED';
+export type InvoiceStatus = 'DRAFT' | 'SENT' | 'PARTIALLY_PAID' | 'PAID' | 'OVERDUE' | 'CANCELLED';
 export type PaymentMethod = 'CASH' | 'BANK_TRANSFER' | 'CARD' | 'MOBILE_MONEY' | 'OTHER';
 
 export interface LineItem {

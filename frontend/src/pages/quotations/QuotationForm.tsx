@@ -13,7 +13,12 @@ interface ItemRow {
   taxPercent: string;
 }
 
-const emptyRow = (): ItemRow => ({ description: '', quantity: '1', unitPrice: '', taxPercent: '0' });
+const emptyRow = (): ItemRow => ({
+  description: '',
+  quantity: '1',
+  unitPrice: '',
+  taxPercent: '0',
+});
 
 const inputClass =
   'w-full bg-[var(--color-input-bg)] border border-[var(--color-input-border)] rounded-xl px-3 py-2 text-sm text-[var(--color-text)] placeholder-[var(--color-text-faint)] focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 transition-colors';
@@ -149,7 +154,13 @@ export default function QuotationForm() {
         to="/quotations"
         className="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
       >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
         </svg>
         Back to quotations
@@ -198,7 +209,9 @@ export default function QuotationForm() {
             <div className="flex flex-col gap-1.5">
               <label className={labelClass}>
                 Expiry date{' '}
-                <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
+                <span className="font-normal normal-case text-[var(--color-text-faint)]">
+                  (opt.)
+                </span>
               </label>
               <input
                 type="date"
@@ -284,8 +297,18 @@ export default function QuotationForm() {
                         className="rounded-lg p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-30"
                         aria-label="Remove item"
                       >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -303,7 +326,9 @@ export default function QuotationForm() {
             <div className="flex flex-col gap-1.5">
               <label className={labelClass}>
                 Notes{' '}
-                <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
+                <span className="font-normal normal-case text-[var(--color-text-faint)]">
+                  (opt.)
+                </span>
               </label>
               <textarea
                 rows={4}

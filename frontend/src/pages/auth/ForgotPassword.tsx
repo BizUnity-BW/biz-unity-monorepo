@@ -43,8 +43,18 @@ export default function ForgotPassword() {
         <div className="w-full max-w-md text-center">
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-10">
             <div className="w-14 h-14 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-5">
-              <svg className="w-7 h-7 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              <svg
+                className="w-7 h-7 text-amber-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
               </svg>
             </div>
             <h2 className="text-xl font-bold text-[var(--color-text)] mb-2">Check your email</h2>
@@ -53,7 +63,10 @@ export default function ForgotPassword() {
             </p>
           </div>
           <p className="text-center text-sm text-[var(--color-text-muted)] mt-6">
-            <Link to="/login" className="text-amber-500 hover:text-amber-400 font-medium transition-colors">
+            <Link
+              to="/login"
+              className="text-amber-500 hover:text-amber-400 font-medium transition-colors"
+            >
               Back to sign in
             </Link>
           </p>
@@ -90,7 +103,13 @@ export default function ForgotPassword() {
               <label className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
                 Email address
               </label>
-              <input type="email" placeholder="you@example.com" autoComplete="email" className={inputClass} {...register('email')} />
+              <input
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                className={inputClass}
+                {...register('email')}
+              />
               {errors.email && <span className="text-red-400 text-xs">{errors.email.message}</span>}
             </div>
 
@@ -105,7 +124,10 @@ export default function ForgotPassword() {
         </div>
 
         <p className="text-center text-sm text-[var(--color-text-muted)] mt-6">
-          <Link to="/login" className="text-amber-500 hover:text-amber-400 font-medium transition-colors">
+          <Link
+            to="/login"
+            className="text-amber-500 hover:text-amber-400 font-medium transition-colors"
+          >
             Back to sign in
           </Link>
         </p>

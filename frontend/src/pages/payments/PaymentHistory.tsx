@@ -38,10 +38,7 @@ export default function PaymentHistory() {
     void load();
   }, [load]);
 
-  const totalCents = useMemo(
-    () => payments.reduce((sum, p) => sum + p.amountCents, 0),
-    [payments],
-  );
+  const totalCents = useMemo(() => payments.reduce((sum, p) => sum + p.amountCents, 0), [payments]);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -63,7 +60,9 @@ export default function PaymentHistory() {
       )}
 
       {loading ? (
-        <div className="py-16 text-center text-sm text-[var(--color-text-muted)]">Loading payments…</div>
+        <div className="py-16 text-center text-sm text-[var(--color-text-muted)]">
+          Loading payments…
+        </div>
       ) : payments.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--color-border)] py-16 text-center">
           <h3 className="text-base font-semibold text-[var(--color-text)]">No payments yet</h3>
@@ -93,7 +92,9 @@ export default function PaymentHistory() {
             <tbody>
               {payments.map((p) => (
                 <tr key={p.id} className="border-t border-[var(--color-border-subtle)]">
-                  <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-secondary)]">{formatDate(p.paidAt)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-secondary)]">
+                    {formatDate(p.paidAt)}
+                  </td>
                   <td className="whitespace-nowrap px-4 py-3">
                     {p.invoice ? (
                       <Link
@@ -111,9 +112,15 @@ export default function PaymentHistory() {
                       ? `${p.invoice.customer.firstName} ${p.invoice.customer.lastName}`
                       : '—'}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-secondary)]">{METHOD_LABELS[p.method]}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-secondary)]">{p.reference ?? '—'}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right text-[var(--color-text)]">{formatMoney(p.amountCents, currency)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-secondary)]">
+                    {METHOD_LABELS[p.method]}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-secondary)]">
+                    {p.reference ?? '—'}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-right text-[var(--color-text)]">
+                    {formatMoney(p.amountCents, currency)}
+                  </td>
                 </tr>
               ))}
             </tbody>

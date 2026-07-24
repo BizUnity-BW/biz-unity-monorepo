@@ -11,16 +11,14 @@ const SLIDES = [
     gradient: 'from-[#1a0a00] via-[#2d1500] to-[#0a0a0a]',
     eyebrow: 'Customer Management',
     title: 'Know every client,\nnever miss a deal.',
-    subtitle:
-      'Store contacts, track history and build lasting relationships   all in one place.',
+    subtitle: 'Store contacts, track history and build lasting relationships   all in one place.',
   },
   {
     image: '../../public/slides/cows.jpg',
     gradient: 'from-[#000d1a] via-[#001933] to-[#0a0a0a]',
     eyebrow: 'Quotations & Invoicing',
     title: 'Send professional\ndocuments in seconds.',
-    subtitle:
-      'Create branded quotations, convert them to invoices and get paid faster.',
+    subtitle: 'Create branded quotations, convert them to invoices and get paid faster.',
   },
   {
     image: '../../public/slides/disenke.jpg',
@@ -43,8 +41,18 @@ const SLIDES = [
 const FEATURES = [
   {
     icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+        />
       </svg>
     ),
     title: 'Customer Management',
@@ -53,8 +61,18 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+        />
       </svg>
     ),
     title: 'Quotations & Invoices',
@@ -63,8 +81,18 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
+        />
       </svg>
     ),
     title: 'Payment Tracking',
@@ -73,8 +101,18 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+        />
       </svg>
     ),
     title: 'Role-Based Access',
@@ -83,8 +121,18 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"
+        />
       </svg>
     ),
     title: 'Live Dashboard',
@@ -93,8 +141,18 @@ const FEATURES = [
   },
   {
     icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"
+        />
       </svg>
     ),
     title: 'Cloud-First, Always On',
@@ -112,12 +170,14 @@ const STEPS = [
   {
     number: '02',
     title: 'Set up your company',
-    description: 'Add your company details, logo and preferred currency once. They appear on every document you send.',
+    description:
+      'Add your company details, logo and preferred currency once. They appear on every document you send.',
   },
   {
     number: '03',
     title: 'Start managing',
-    description: 'Add customers, send your first quotation and track payments   all before your next meeting.',
+    description:
+      'Add customers, send your first quotation and track payments   all before your next meeting.',
   },
 ];
 
@@ -156,7 +216,6 @@ export default function LandingPage() {
 
   return (
     <div className="bg-[var(--color-bg)] text-[var(--color-text)] min-h-screen font-sans">
-
       {/* ── NAV ─────────────────────────────────────────────────────── */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -169,9 +228,15 @@ export default function LandingPage() {
           <img src={logo} alt="BizUnity" className="h-30 w-auto" />
 
           <div className="hidden md:flex items-center gap-8 text-sm text-[var(--color-text-secondary)]">
-            <a href="#features" className="hover:text-amber-500 transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-amber-500 transition-colors">How it works</a>
-            <a href="#about" className="hover:text-amber-500 transition-colors">About</a>
+            <a href="#features" className="hover:text-amber-500 transition-colors">
+              Features
+            </a>
+            <a href="#how-it-works" className="hover:text-amber-500 transition-colors">
+              How it works
+            </a>
+            <a href="#about" className="hover:text-amber-500 transition-colors">
+              About
+            </a>
           </div>
 
           <div className="flex items-center gap-3">
@@ -221,8 +286,8 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-lg md:text-xl text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-10 leading-relaxed">
-            Manage customers, send professional quotations, issue invoices and track
-            every payment   in one platform built for the way African businesses actually work.
+            Manage customers, send professional quotations, issue invoices and track every payment
+            in one platform built for the way African businesses actually work.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
@@ -231,8 +296,18 @@ export default function LandingPage() {
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-base px-8 py-4 rounded-xl transition-all hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]"
             >
               Start for free
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                />
               </svg>
             </Link>
             <a
@@ -248,7 +323,9 @@ export default function LandingPage() {
             {STATS.map((s) => (
               <div key={s.label} className="bg-[var(--color-bg)] px-6 py-5 text-center">
                 <div className="text-2xl font-bold text-amber-500 mb-1">{s.value}</div>
-                <div className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">{s.label}</div>
+                <div className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">
+                  {s.label}
+                </div>
               </div>
             ))}
           </div>
@@ -256,7 +333,13 @@ export default function LandingPage() {
 
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[var(--color-text-faintest)] text-xs animate-bounce">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
@@ -322,7 +405,13 @@ export default function LandingPage() {
             className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-white/20 bg-black/40 backdrop-blur-sm flex items-center justify-center hover:border-amber-500/60 hover:text-amber-400 text-white transition-colors"
             aria-label="Previous slide"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
@@ -331,7 +420,13 @@ export default function LandingPage() {
             className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-white/20 bg-black/40 backdrop-blur-sm flex items-center justify-center hover:border-amber-500/60 hover:text-amber-400 text-white transition-colors"
             aria-label="Next slide"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -350,7 +445,6 @@ export default function LandingPage() {
             ))}
           </div>
         </div>
-
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────────── */}
@@ -375,7 +469,9 @@ export default function LandingPage() {
                   {f.icon}
                 </div>
                 <h3 className="text-[var(--color-text)] font-semibold text-base mb-2">{f.title}</h3>
-                <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">{f.description}</p>
+                <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">
+                  {f.description}
+                </p>
               </div>
             ))}
           </div>
@@ -383,7 +479,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────── */}
-      <section id="how-it-works" className="py-24 px-6 border-t border-[var(--color-border-subtle)]">
+      <section
+        id="how-it-works"
+        className="py-24 px-6 border-t border-[var(--color-border-subtle)]"
+      >
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-amber-500/70 text-sm uppercase tracking-[0.2em] font-semibold mb-3">
@@ -405,8 +504,12 @@ export default function LandingPage() {
                     <span className="text-2xl font-black text-amber-500">{step.number}</span>
                   </div>
                 </div>
-                <h3 className="text-[var(--color-text)] font-semibold text-base mb-2">{step.title}</h3>
-                <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">{step.description}</p>
+                <h3 className="text-[var(--color-text)] font-semibold text-base mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">
+                  {step.description}
+                </p>
               </div>
             ))}
           </div>
@@ -430,8 +533,8 @@ export default function LandingPage() {
               Built to uplift African enterprise
             </h2>
             <p className="text-[var(--color-text-secondary)] text-base leading-relaxed max-w-2xl mx-auto mb-8">
-              BizUnity was built because African SMEs deserve the same professional tools that global
-              enterprises use   without the complexity, the price tag, or the systems built for
+              BizUnity was built because African SMEs deserve the same professional tools that
+              global enterprises use without the complexity, the price tag, or the systems built for
               other markets. We start with Southern Africa and we are here to stay.
             </p>
             <Link
@@ -439,8 +542,18 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold px-8 py-3.5 rounded-xl transition-all hover:shadow-[0_0_30px_rgba(245,158,11,0.35)] text-sm"
             >
               Join BizUnity today
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                />
               </svg>
             </Link>
           </div>
@@ -484,8 +597,18 @@ export default function LandingPage() {
             © {new Date().getFullYear()} BizUnity. Built for African enterprise.
           </p>
           <div className="flex gap-6 text-xs text-[var(--color-text-faint)]">
-            <Link to="/login" className="hover:text-[var(--color-text-secondary)] transition-colors">Sign in</Link>
-            <Link to="/register" className="hover:text-[var(--color-text-secondary)] transition-colors">Register</Link>
+            <Link
+              to="/login"
+              className="hover:text-[var(--color-text-secondary)] transition-colors"
+            >
+              Sign in
+            </Link>
+            <Link
+              to="/register"
+              className="hover:text-[var(--color-text-secondary)] transition-colors"
+            >
+              Register
+            </Link>
           </div>
         </div>
       </footer>

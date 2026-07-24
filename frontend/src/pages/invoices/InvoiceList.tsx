@@ -94,8 +94,18 @@ export default function InvoiceList() {
           onClick={openConvert}
           className="flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-black transition-colors hover:bg-amber-400"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3v11.25" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2.25}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3v11.25"
+            />
           </svg>
           New from quotation
         </button>
@@ -117,7 +127,9 @@ export default function InvoiceList() {
       )}
 
       {loading ? (
-        <div className="py-16 text-center text-sm text-[var(--color-text-muted)]">Loading invoices…</div>
+        <div className="py-16 text-center text-sm text-[var(--color-text-muted)]">
+          Loading invoices…
+        </div>
       ) : invoices.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--color-border)] py-16 text-center">
           <h3 className="text-base font-semibold text-[var(--color-text)]">No invoices yet</h3>
@@ -155,12 +167,24 @@ export default function InvoiceList() {
                   onClick={() => navigate(`/invoices/${i.id}`)}
                   className="cursor-pointer border-t border-[var(--color-border-subtle)] transition-colors hover:bg-[var(--color-surface-hover)]"
                 >
-                  <td className="whitespace-nowrap px-4 py-3 font-medium text-[var(--color-text)]">{i.number}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-secondary)]">{customerName(i)}</td>
-                  <td className="whitespace-nowrap px-4 py-3"><StatusPill status={i.status} /></td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right text-[var(--color-text)]">{formatMoney(i.totalCents, currency)}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right text-[var(--color-text-secondary)]">{formatMoney(i.totalCents - i.paidCents, currency)}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-secondary)]">{formatDate(i.dueDate)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 font-medium text-[var(--color-text)]">
+                    {i.number}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-secondary)]">
+                    {customerName(i)}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <StatusPill status={i.status} />
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-right text-[var(--color-text)]">
+                    {formatMoney(i.totalCents, currency)}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-right text-[var(--color-text-secondary)]">
+                    {formatMoney(i.totalCents - i.paidCents, currency)}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-secondary)]">
+                    {formatDate(i.dueDate)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -177,13 +201,17 @@ export default function InvoiceList() {
             className="w-full max-w-lg rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-bold text-[var(--color-text)]">Convert a quotation to an invoice</h2>
+            <h2 className="text-lg font-bold text-[var(--color-text)]">
+              Convert a quotation to an invoice
+            </h2>
             <p className="mt-1 mb-4 text-sm text-[var(--color-text-muted)]">
               Pick a quotation. Its line items and totals are copied to a new invoice.
             </p>
 
             {quotationsLoading ? (
-              <div className="py-8 text-center text-sm text-[var(--color-text-muted)]">Loading quotations…</div>
+              <div className="py-8 text-center text-sm text-[var(--color-text-muted)]">
+                Loading quotations…
+              </div>
             ) : quotations.length === 0 ? (
               <div className="py-8 text-center text-sm text-[var(--color-text-muted)]">
                 No convertible quotations. Create one first.

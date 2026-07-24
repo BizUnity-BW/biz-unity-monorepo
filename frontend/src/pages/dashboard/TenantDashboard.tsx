@@ -29,10 +29,22 @@ export default function TenantDashboard() {
     setLoading(true);
     // Each call is independent — one empty/failed resource shouldn't blank the whole dashboard.
     const [customers, quotations, invoices, payments] = await Promise.all([
-      customersApi.list().then((r) => r.data.data).catch(() => [] as Customer[]),
-      quotationsApi.list().then((r) => r.data.data).catch(() => [] as Quotation[]),
-      invoicesApi.list().then((r) => r.data.data).catch(() => [] as Invoice[]),
-      paymentsApi.list().then((r) => r.data.data).catch(() => [] as Payment[]),
+      customersApi
+        .list()
+        .then((r) => r.data.data)
+        .catch(() => [] as Customer[]),
+      quotationsApi
+        .list()
+        .then((r) => r.data.data)
+        .catch(() => [] as Quotation[]),
+      invoicesApi
+        .list()
+        .then((r) => r.data.data)
+        .catch(() => [] as Invoice[]),
+      paymentsApi
+        .list()
+        .then((r) => r.data.data)
+        .catch(() => [] as Payment[]),
     ]);
     setData({ customers, quotations, invoices, payments });
     setLoading(false);
@@ -58,14 +70,24 @@ export default function TenantDashboard() {
           {firstName ? `Welcome back, ${firstName}` : 'Dashboard'}
         </h1>
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-          {organisation?.name ? `Here's how ${organisation.name} is doing.` : 'Overview of your business.'}
+          {organisation?.name
+            ? `Here's how ${organisation.name} is doing.`
+            : 'Overview of your business.'}
         </p>
       </div>
 
       {/* KPI cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Customers" value={loading ? '…' : String(data?.customers.length ?? 0)} to="/customers" />
-        <StatCard label="Quotations" value={loading ? '…' : String(data?.quotations.length ?? 0)} to="/quotations" />
+        <StatCard
+          label="Customers"
+          value={loading ? '…' : String(data?.customers.length ?? 0)}
+          to="/customers"
+        />
+        <StatCard
+          label="Quotations"
+          value={loading ? '…' : String(data?.quotations.length ?? 0)}
+          to="/quotations"
+        />
         <StatCard
           label="Outstanding"
           value={loading ? '…' : formatMoney(outstandingCents, currency)}
@@ -84,13 +106,18 @@ export default function TenantDashboard() {
       <div className="mt-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
         <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
           <h2 className="text-sm font-semibold text-[var(--color-text)]">Recent quotations</h2>
-          <Link to="/quotations" className="text-xs font-medium text-amber-500 hover:text-amber-400">
+          <Link
+            to="/quotations"
+            className="text-xs font-medium text-amber-500 hover:text-amber-400"
+          >
             View all
           </Link>
         </div>
 
         {loading ? (
-          <div className="px-5 py-10 text-center text-sm text-[var(--color-text-muted)]">Loading…</div>
+          <div className="px-5 py-10 text-center text-sm text-[var(--color-text-muted)]">
+            Loading…
+          </div>
         ) : recentQuotations.length === 0 ? (
           <div className="px-5 py-10 text-center text-sm text-[var(--color-text-muted)]">
             No quotations yet.{' '}
@@ -110,11 +137,15 @@ export default function TenantDashboard() {
                       {q.customer ? `${q.customer.firstName} ${q.customer.lastName}` : ''}
                     </span>
                   </p>
-                  <p className="text-xs text-[var(--color-text-faint)]">{formatDate(q.issueDate)}</p>
+                  <p className="text-xs text-[var(--color-text-faint)]">
+                    {formatDate(q.issueDate)}
+                  </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <StatusPill status={q.status} />
-                  <span className="text-sm text-[var(--color-text)]">{formatMoney(q.totalCents, currency)}</span>
+                  <span className="text-sm text-[var(--color-text)]">
+                    {formatMoney(q.totalCents, currency)}
+                  </span>
                 </div>
               </li>
             ))}
@@ -141,7 +172,9 @@ function StatCard({
       to={to}
       className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-colors hover:border-amber-500/40"
     >
-      <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">{label}</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
+        {label}
+      </p>
       <p className="mt-2 text-2xl font-bold text-[var(--color-text)]">{value}</p>
       {hint && <p className="mt-1 text-xs text-[var(--color-text-faint)]">{hint}</p>}
     </Link>

@@ -20,8 +20,7 @@ type FormData = z.infer<typeof schema>;
 const inputClass =
   'w-full bg-[var(--color-input-bg)] border border-[var(--color-input-border)] rounded-xl px-4 py-2.5 text-sm text-[var(--color-text)] placeholder-[var(--color-text-faint)] focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 transition-colors';
 
-const labelClass =
-  'text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide';
+const labelClass = 'text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide';
 
 /** Maps empty strings to undefined so optional fields aren't stored as "". */
 function clean(data: FormData): Partial<Customer> {
@@ -126,7 +125,10 @@ export default function CustomerFormModal({ open, initial, onClose, onSaved }: P
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <label className={labelClass}>
-                Email <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
+                Email{' '}
+                <span className="font-normal normal-case text-[var(--color-text-faint)]">
+                  (opt.)
+                </span>
               </label>
               <input
                 type="email"
@@ -138,7 +140,10 @@ export default function CustomerFormModal({ open, initial, onClose, onSaved }: P
             </div>
             <div className="flex flex-col gap-1.5">
               <label className={labelClass}>
-                Phone <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
+                Phone{' '}
+                <span className="font-normal normal-case text-[var(--color-text-faint)]">
+                  (opt.)
+                </span>
               </label>
               <input
                 type="tel"
@@ -151,14 +156,16 @@ export default function CustomerFormModal({ open, initial, onClose, onSaved }: P
 
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>
-              Company <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
+              Company{' '}
+              <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
             </label>
             <input className={inputClass} placeholder="Acme (Pty) Ltd" {...register('company')} />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>
-              Address <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
+              Address{' '}
+              <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
             </label>
             <textarea
               rows={2}
@@ -170,7 +177,8 @@ export default function CustomerFormModal({ open, initial, onClose, onSaved }: P
 
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>
-              Notes <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
+              Notes{' '}
+              <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
             </label>
             <textarea
               rows={2}
