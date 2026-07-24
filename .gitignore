@@ -31,3 +31,9 @@ frontend/.vite/
 
 # Coverage
 coverage/
+
+# Compound-engineering working notes (local only — the method lives in CLAUDE.md + .claude/)
+/docs/plans/
+/docs/reports/
+/docs/solutions/
+/CONCEPTS.md

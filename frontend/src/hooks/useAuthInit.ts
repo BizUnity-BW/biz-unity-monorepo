@@ -7,7 +7,8 @@ import { authApi } from '../api/auth';
  * Must be called exactly ONCE at the top of the component tree (App).
  */
 export function useAuthInit() {
-  const { setSession, setProfile, setOrganisation, setProfileLoading } = useAuthStore();
+  const { setSession, setProfile, setOrganisation, setProfileLoading, setAuthReady } =
+    useAuthStore();
 
   useEffect(() => {
     let isFetching = false;
@@ -29,11 +30,18 @@ export function useAuthInit() {
       }
     }
 
-    // Restore session on page load
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      if (data.session) fetchProfile();
-    });
+    // Restore session on page load. Mark auth "ready" only AFTER the session (and, if signed
+    // in, the initial profile) has resolved — route guards wait for this so a hard page load
+    // doesn't redirect to /login before the session is restored.
+    (async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        setSession(data.session);
+        if (data.session) await fetchProfile();
+      } finally {
+        setAuthReady(true);
+      }
+    })();
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);

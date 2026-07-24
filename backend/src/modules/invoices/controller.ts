@@ -35,6 +35,28 @@ export async function create(req: Request, res: Response): Promise<void> {
   ok(res, await service.createInvoice((req as AuthenticatedRequest).org.id, parsed.data), 201);
 }
 
+export async function createFromQuotation(req: Request, res: Response): Promise<void> {
+  const quotationId = req.params.quotationId as string;
+  const dueDate = typeof req.body?.dueDate === 'string' ? req.body.dueDate : undefined;
+
+  const result = await service.createInvoiceFromQuotation(
+    (req as AuthenticatedRequest).org.id,
+    quotationId,
+    { dueDate },
+  );
+
+  if ('error' in result) {
+    if (result.error === 'NOT_FOUND') {
+      fail(res, 'Quotation not found', 404);
+    } else {
+      fail(res, 'This quotation has already been converted to an invoice', 409);
+    }
+    return;
+  }
+
+  ok(res, result, 201);
+}
+
 export async function updateStatus(req: Request, res: Response): Promise<void> {
   const parsed = statusSchema.safeParse(req.body);
   if (!parsed.success) {

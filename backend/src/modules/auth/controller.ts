@@ -1,4 +1,6 @@
 import { Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
+import { env } from '../../config/env';
 import { prisma } from '../../config/prisma';
 import { supabaseAdmin } from '../../config/supabase';
 import { ok, fail, slugify } from '../../shared/utils';
@@ -19,10 +21,15 @@ export async function register(req: Request, res: Response): Promise<void> {
 
   const { email, password } = parsed.data;
 
+  // DEV: auto-confirm the email in non-production so no confirmation email is required.
+  // Production still requires real email confirmation (needs SMTP + templates configured).
+  // TODO: enable proper email confirmation before production — see ClickUp task.
+  const autoConfirm = env.NODE_ENV !== 'production';
+
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
-    email_confirm: false, // TODO: set to true when email is configured
+    email_confirm: autoConfirm,
   });
 
   if (error) {
@@ -37,7 +44,15 @@ export async function register(req: Request, res: Response): Promise<void> {
     },
   });
 
-  ok(res, { message: 'Check your email to confirm your account' }, 201);
+  ok(
+    res,
+    {
+      message: autoConfirm
+        ? 'Account created. You can sign in now.'
+        : 'Check your email to confirm your account',
+    },
+    201,
+  );
 }
 
 // POST /api/v1/auth/profile — requires auth
@@ -94,7 +109,7 @@ export async function createOrganisation(req: Request, res: Response): Promise<v
   const { name, email, phone, address, currency } = parsed.data;
   let slug = slugify(name);
 
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     // Handle slug collisions
     const existing = await tx.organisation.findUnique({ where: { slug } });
     if (existing) {

@@ -29,23 +29,23 @@ const Spinner = () => (
 
 // Public landing page   redirects to /dashboard if already signed in
 function RootRoute() {
-  const { isAuthenticated, profileLoading } = useAuth();
-  if (profileLoading) return <Spinner />;
+  const { isAuthenticated, authReady } = useAuth();
+  if (!authReady) return <Spinner />;
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
   return <LandingPage />;
 }
 
 // Redirect to dashboard if already signed in
 function AuthRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, profileLoading } = useAuth();
-  if (profileLoading) return <Spinner />;
+  const { isAuthenticated, authReady } = useAuth();
+  if (!authReady) return <Spinner />;
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : <>{children}</>;
 }
 
 // Enforces profile completion and org setup before reaching app routes
 function ProfileGuard({ children }: { children: React.ReactNode }) {
-  const { profileLoading, isProfileComplete, hasOrganisation } = useAuth();
-  if (profileLoading) return <Spinner />;
+  const { authReady, profileLoading, isProfileComplete, hasOrganisation } = useAuth();
+  if (!authReady || profileLoading) return <Spinner />;
   if (!isProfileComplete) return <Navigate to="/onboarding/profile" replace />;
   if (!hasOrganisation) return <Navigate to="/onboarding/company" replace />;
   return <>{children}</>;
@@ -53,16 +53,16 @@ function ProfileGuard({ children }: { children: React.ReactNode }) {
 
 // Requires auth + enforces onboarding completion
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, profileLoading } = useAuth();
-  if (profileLoading) return <Spinner />;
+  const { isAuthenticated, authReady } = useAuth();
+  if (!authReady) return <Spinner />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <ProfileGuard>{children}</ProfileGuard>;
 }
 
 // Auth required but onboarding steps are NOT enforced
 function OnboardingRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, profileLoading } = useAuth();
-  if (profileLoading) return <Spinner />;
+  const { isAuthenticated, authReady } = useAuth();
+  if (!authReady) return <Spinner />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }

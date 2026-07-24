@@ -1,5 +1,5 @@
 import { prisma } from '../../config/prisma';
-import { QuotationStatus } from '@prisma/client';
+import { Prisma, QuotationStatus } from '@prisma/client';
 
 export type LineItem = {
   description: string;
@@ -67,4 +67,41 @@ export async function createQuotation(
 
 export function updateQuotationStatus(id: string, organisationId: string, status: QuotationStatus) {
   return prisma.quotation.updateMany({ where: { id, organisationId }, data: { status } });
+}
+
+export async function updateQuotation(
+  id: string,
+  organisationId: string,
+  data: { customerId: string; items: LineItem[]; expiryDate?: string; notes?: string },
+) {
+  // Tenant guard: only touch a quotation that belongs to this org.
+  const existing = await prisma.quotation.findFirst({ where: { id, organisationId } });
+  if (!existing) return null;
+
+  const totals = calcTotals(data.items);
+
+  // Replace line items wholesale, then recalc + persist totals, in one transaction.
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    await tx.quotationItem.deleteMany({ where: { quotationId: id } });
+    return tx.quotation.update({
+      where: { id },
+      data: {
+        customerId: data.customerId,
+        expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
+        notes: data.notes,
+        ...totals,
+        items: {
+          create: data.items.map((item, idx) => ({
+            description: item.description,
+            quantity: item.quantity,
+            unitPriceCents: item.unitPriceCents,
+            taxPercent: item.taxPercent ?? 0,
+            totalCents: Math.round(item.quantity * item.unitPriceCents),
+            sortOrder: item.sortOrder ?? idx,
+          })),
+        },
+      },
+      include: { items: true, customer: true },
+    });
+  });
 }

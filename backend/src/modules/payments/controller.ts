@@ -14,5 +14,13 @@ export async function create(req: Request, res: Response): Promise<void> {
     fail(res, 'Validation failed', 422, parsed.error.flatten());
     return;
   }
-  ok(res, await service.createPayment((req as AuthenticatedRequest).org.id, parsed.data), 201);
+  const payment = await service.createPayment(
+    (req as AuthenticatedRequest).org.id,
+    parsed.data,
+  );
+  if (!payment) {
+    fail(res, 'Invoice not found', 404);
+    return;
+  }
+  ok(res, payment, 201);
 }

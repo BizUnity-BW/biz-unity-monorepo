@@ -3,7 +3,11 @@ import { useAuth } from '../../hooks/useAuth';
 import { useThemeStore } from '../../store/themeStore';
 import ThemeToggle from '../ui/ThemeToggle';
 
-export default function Header() {
+interface Props {
+  onMenuClick: () => void;
+}
+
+export default function Header({ onMenuClick }: Props) {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
   const theme = useThemeStore((s) => s.theme);
@@ -26,9 +30,18 @@ export default function Header() {
   const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_WB.png';
 
   return (
-    <header className="h-16 border-b border-[var(--color-border)] bg-[var(--color-header)] flex items-center justify-between px-6 flex-shrink-0">
-      {/* Left   page context can be added here later */}
-      <div />
+    <header className="h-16 border-b border-[var(--color-border)] bg-[var(--color-header)] flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+      {/* Left — hamburger (mobile only) to open the sidebar drawer */}
+      <button
+        onClick={onMenuClick}
+        className="md:hidden -ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
+        aria-label="Open menu"
+      >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+      </button>
+      <div className="hidden md:block" />
 
       {/* Right   theme toggle + user + sign out */}
       <div className="flex items-center gap-2">

@@ -27,6 +27,7 @@ export function useAuth() {
     profile: store.profile,
     organisation: store.organisation,
     profileLoading: store.profileLoading,
+    authReady: store.authReady,
     isAuthenticated: !!store.session,
     isProfileComplete: !!store.profile?.firstName && !!store.profile?.lastName,
     hasOrganisation: !!store.profile?.organisationId,

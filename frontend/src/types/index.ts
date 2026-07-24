@@ -104,6 +104,7 @@ export interface Invoice {
   deletedAt: string | null;
   customer?: Customer;
   items?: LineItem[];
+  payments?: Payment[];
 }
 
 export interface Payment {
@@ -115,6 +116,7 @@ export interface Payment {
   notes: string | null;
   paidAt: string;
   createdAt: string;
+  invoice?: Invoice;
 }
 
 export interface ApiResponse<T> {

@@ -35,6 +35,24 @@ export async function create(req: Request, res: Response): Promise<void> {
   ok(res, await service.createQuotation((req as AuthenticatedRequest).org.id, parsed.data), 201);
 }
 
+export async function update(req: Request, res: Response): Promise<void> {
+  const parsed = quotationSchema.safeParse(req.body);
+  if (!parsed.success) {
+    fail(res, 'Validation failed', 422, parsed.error.flatten());
+    return;
+  }
+  const updated = await service.updateQuotation(
+    req.params.id as string,
+    (req as AuthenticatedRequest).org.id,
+    parsed.data,
+  );
+  if (!updated) {
+    fail(res, 'Not found', 404);
+    return;
+  }
+  ok(res, updated);
+}
+
 export async function updateStatus(req: Request, res: Response): Promise<void> {
   const parsed = statusSchema.safeParse(req.body);
   if (!parsed.success) {

@@ -16,11 +16,16 @@ interface AuthState {
   profile: UserProfile | null;
   organisation: Organisation | null;
   profileLoading: boolean;
+  // True once the initial session restore (+ profile fetch, if signed in) has completed.
+  // Route guards must wait for this before deciding to redirect, or a hard page load
+  // redirects to /login before the session is restored (deep-link bounce).
+  authReady: boolean;
   // Actions
   setSession: (session: Session | null) => void;
   setProfile: (profile: UserProfile | null) => void;
   setOrganisation: (organisation: Organisation | null) => void;
   setProfileLoading: (loading: boolean) => void;
+  setAuthReady: (ready: boolean) => void;
   signOut: () => Promise<void>;
 }
 
@@ -30,6 +35,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   profile: null,
   organisation: null,
   profileLoading: false,
+  authReady: false,
 
   setSession: (session) => set({ session, user: session?.user ?? null }),
 
@@ -38,6 +44,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   setOrganisation: (organisation) => set({ organisation }),
 
   setProfileLoading: (profileLoading) => set({ profileLoading }),
+
+  setAuthReady: (authReady) => set({ authReady }),
 
   signOut: async () => {
     await supabase.auth.signOut();

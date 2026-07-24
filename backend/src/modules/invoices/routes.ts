@@ -9,6 +9,7 @@ router.use(requireAuth, requireTenant);
 router.get('/', controller.list);
 router.get('/:id', controller.get);
 router.post('/', controller.create);
+router.post('/from-quotation/:quotationId', controller.createFromQuotation);
 router.patch('/:id/status', controller.updateStatus);
 
 export default router;
