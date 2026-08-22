@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -46,22 +46,27 @@ interface Props {
   onSaved: () => void;
 }
 
+/**
+ * Gate only — the form itself lives below and mounts fresh every time the modal opens.
+ * That remount is what re-seeds the fields and clears any previous error, so no effect
+ * has to synchronise them.
+ */
 export default function CustomerFormModal({ open, initial, onClose, onSaved }: Props) {
+  if (!open) return null;
+  return <CustomerForm initial={initial} onClose={onClose} onSaved={onSaved} />;
+}
+
+function CustomerForm({ initial, onClose, onSaved }: Omit<Props, 'open'>) {
   const [error, setError] = useState<string | null>(null);
   const isEdit = Boolean(initial);
 
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
-
-  // Re-seed the form each time the modal opens (for edit) or clears (for create).
-  useEffect(() => {
-    if (!open) return;
-    setError(null);
-    reset({
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
       firstName: initial?.firstName ?? '',
       lastName: initial?.lastName ?? '',
       email: initial?.email ?? '',
@@ -69,10 +74,8 @@ export default function CustomerFormModal({ open, initial, onClose, onSaved }: P
       company: initial?.company ?? '',
       address: initial?.address ?? '',
       notes: initial?.notes ?? '',
-    });
-  }, [open, initial, reset]);
-
-  if (!open) return null;
+    },
+  });
 
   async function onSubmit(data: FormData) {
     setError(null);

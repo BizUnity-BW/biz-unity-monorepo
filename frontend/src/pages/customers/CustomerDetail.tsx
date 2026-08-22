@@ -4,6 +4,8 @@ import { customersApi } from '../../api/customers';
 import type { Customer } from '../../types';
 import CustomerFormModal from './CustomerFormModal';
 import ConfirmDialog from './ConfirmDialog';
+import SkeletonShimmer from '../../components/ui/SkeletonShimmer';
+import { PLACEHOLDER_CUSTOMER } from '../../lib/skeletonPlaceholders';
 
 function errMessage(err: unknown, fallback: string): string {
   return (err as { response?: { data?: { error?: string } } })?.response?.data?.error ?? fallback;
@@ -64,6 +66,10 @@ export default function CustomerDetail() {
     }
   }
 
+  // Shimmer measures the rendered children, so the layout must still render while
+  // loading — with a stand-in customer standing in for the real one.
+  const model = customer ?? PLACEHOLDER_CUSTOMER;
+
   return (
     <div className="mx-auto max-w-3xl">
       <Link
@@ -82,19 +88,17 @@ export default function CustomerDetail() {
         Back to customers
       </Link>
 
-      {loading ? (
-        <div className="py-16 text-center text-sm text-[var(--color-text-muted)]">Loading…</div>
-      ) : error ? (
+      {error ? (
         <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           {error}
         </div>
-      ) : customer ? (
-        <>
+      ) : loading || customer ? (
+        <SkeletonShimmer loading={loading}>
           <div className="mt-4 flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-[var(--color-text)]">{fullName(customer)}</h1>
-              {customer.company && (
-                <p className="mt-1 text-sm text-[var(--color-text-muted)]">{customer.company}</p>
+              <h1 className="text-2xl font-bold text-[var(--color-text)]">{fullName(model)}</h1>
+              {model.company && (
+                <p className="mt-1 text-sm text-[var(--color-text-muted)]">{model.company}</p>
               )}
             </div>
             <div className="flex gap-2">
@@ -115,26 +119,32 @@ export default function CustomerDetail() {
 
           <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
             <dl className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
-              <Field label="Email" value={customer.email} />
-              <Field label="Phone" value={customer.phone} />
-              <Field label="Company" value={customer.company} />
-              <Field label="Address" value={customer.address} />
-              <Field label="Added" value={formatDate(customer.createdAt)} />
-              <Field label="Last updated" value={formatDate(customer.updatedAt)} />
+              <Field label="Email" value={model.email} />
+              <Field label="Phone" value={model.phone} />
+              <Field label="Company" value={model.company} />
+              <Field label="Address" value={model.address} />
+              <Field label="Added" value={formatDate(model.createdAt)} />
+              <Field label="Last updated" value={formatDate(model.updatedAt)} />
             </dl>
 
-            {customer.notes && (
+            {model.notes && (
               <div className="mt-6 border-t border-[var(--color-border-subtle)] pt-5">
                 <dt className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
                   Notes
                 </dt>
                 <dd className="mt-1.5 whitespace-pre-wrap text-sm text-[var(--color-text-secondary)]">
-                  {customer.notes}
+                  {model.notes}
                 </dd>
               </div>
             )}
           </div>
+        </SkeletonShimmer>
+      ) : null}
 
+      {/* Overlays live outside the shimmer: they are fixed-position, so measuring
+          them would produce stray blocks, and they only open once data has loaded. */}
+      {customer && (
+        <>
           <CustomerFormModal
             open={editOpen}
             initial={customer}
@@ -156,7 +166,7 @@ export default function CustomerDetail() {
             onCancel={() => setConfirmOpen(false)}
           />
         </>
-      ) : null}
+      )}
     </div>
   );
 }

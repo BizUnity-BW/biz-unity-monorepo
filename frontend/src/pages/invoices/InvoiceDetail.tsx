@@ -5,6 +5,8 @@ import { paymentsApi } from '../../api/payments';
 import { useAuth } from '../../hooks/useAuth';
 import { formatMoney, formatDate, errMessage } from '../../lib/format';
 import StatusPill from '../../components/ui/StatusPill';
+import SkeletonShimmer from '../../components/ui/SkeletonShimmer';
+import { PLACEHOLDER_INVOICE } from '../../lib/skeletonPlaceholders';
 import type { Invoice, InvoiceStatus, PaymentMethod } from '../../types';
 
 const STATUSES: InvoiceStatus[] = [
@@ -71,7 +73,10 @@ export default function InvoiceDetail() {
     }
   }
 
-  const balanceCents = invoice ? invoice.totalCents - invoice.paidCents : 0;
+  // Shimmer measures the rendered children, so the layout must still render while
+  // loading — with a stand-in invoice standing in for the real one.
+  const model = invoice ?? PLACEHOLDER_INVOICE;
+  const balanceCents = model.totalCents - model.paidCents;
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -91,28 +96,26 @@ export default function InvoiceDetail() {
         Back to invoices
       </Link>
 
-      {loading ? (
-        <div className="py-16 text-center text-sm text-[var(--color-text-muted)]">Loading…</div>
-      ) : error ? (
+      {error ? (
         <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           {error}
         </div>
-      ) : invoice ? (
-        <>
+      ) : loading || invoice ? (
+        <SkeletonShimmer loading={loading}>
           <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-[var(--color-text)]">{invoice.number}</h1>
-                <StatusPill status={invoice.status} />
+                <h1 className="text-2xl font-bold text-[var(--color-text)]">{model.number}</h1>
+                <StatusPill status={model.status} />
               </div>
               <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                {customerName(invoice)} · Issued {formatDate(invoice.issueDate)}
-                {invoice.dueDate ? ` · Due ${formatDate(invoice.dueDate)}` : ''}
+                {customerName(model)} · Issued {formatDate(model.issueDate)}
+                {model.dueDate ? ` · Due ${formatDate(model.dueDate)}` : ''}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <select
-                value={invoice.status}
+                value={model.status}
                 onChange={(e) => changeStatus(e.target.value as InvoiceStatus)}
                 className="rounded-xl border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-amber-500/60 focus:outline-none"
                 aria-label="Change status"
@@ -147,7 +150,7 @@ export default function InvoiceDetail() {
                 </tr>
               </thead>
               <tbody>
-                {(invoice.items ?? []).map((it) => (
+                {(model.items ?? []).map((it) => (
                   <tr key={it.id} className="border-t border-[var(--color-border-subtle)]">
                     <td className="px-4 py-3 text-[var(--color-text)]">{it.description}</td>
                     <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">
@@ -171,13 +174,13 @@ export default function InvoiceDetail() {
           {/* Totals */}
           <div className="mt-4 flex justify-end">
             <div className="w-full max-w-xs rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm">
-              <Row label="Subtotal" value={formatMoney(invoice.subtotalCents, currency)} />
-              <Row label="Tax" value={formatMoney(invoice.taxCents, currency)} />
+              <Row label="Subtotal" value={formatMoney(model.subtotalCents, currency)} />
+              <Row label="Tax" value={formatMoney(model.taxCents, currency)} />
               <div className="mt-1 flex justify-between border-t border-[var(--color-border)] pt-2 text-base font-bold text-[var(--color-text)]">
                 <span>Total</span>
-                <span>{formatMoney(invoice.totalCents, currency)}</span>
+                <span>{formatMoney(model.totalCents, currency)}</span>
               </div>
-              <Row label="Paid" value={formatMoney(invoice.paidCents, currency)} muted />
+              <Row label="Paid" value={formatMoney(model.paidCents, currency)} muted />
               <div className="mt-1 flex justify-between border-t border-[var(--color-border-subtle)] pt-2 font-semibold text-[var(--color-text)]">
                 <span>Balance due</span>
                 <span className={balanceCents > 0 ? 'text-amber-500' : 'text-emerald-500'}>
@@ -192,13 +195,13 @@ export default function InvoiceDetail() {
             <div className="border-b border-[var(--color-border)] px-5 py-4">
               <h2 className="text-sm font-semibold text-[var(--color-text)]">Payments</h2>
             </div>
-            {(invoice.payments ?? []).length === 0 ? (
+            {(model.payments ?? []).length === 0 ? (
               <div className="px-5 py-8 text-center text-sm text-[var(--color-text-muted)]">
                 No payments recorded yet.
               </div>
             ) : (
               <ul className="divide-y divide-[var(--color-border-subtle)]">
-                {(invoice.payments ?? []).map((p) => (
+                {(model.payments ?? []).map((p) => (
                   <li key={p.id} className="flex items-center justify-between gap-3 px-5 py-3">
                     <div>
                       <p className="text-sm text-[var(--color-text)]">
@@ -217,21 +220,22 @@ export default function InvoiceDetail() {
               </ul>
             )}
           </div>
-
-          {payOpen && (
-            <RecordPaymentModal
-              invoice={invoice}
-              currency={currency}
-              defaultAmountCents={balanceCents}
-              onClose={() => setPayOpen(false)}
-              onSaved={() => {
-                setPayOpen(false);
-                void load();
-              }}
-            />
-          )}
-        </>
+        </SkeletonShimmer>
       ) : null}
+
+      {/* Fixed-position overlay, so it stays outside the shimmer's measured subtree. */}
+      {payOpen && invoice && (
+        <RecordPaymentModal
+          invoice={invoice}
+          currency={currency}
+          defaultAmountCents={balanceCents}
+          onClose={() => setPayOpen(false)}
+          onSaved={() => {
+            setPayOpen(false);
+            void load();
+          }}
+        />
+      )}
     </div>
   );
 }
