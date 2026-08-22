@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node 'C:\\Users\\lebogangb\\WebstormProjects\\biz-unity-monorepo\\.codex\\hooks\\compound-reminder.js'"
+          }
+        ]
+      }
+    ]
+  }
+}

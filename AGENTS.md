@@ -1,0 +1,181 @@
+# AGENTS.md
+
+This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+
+## Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS v4 |
+| Routing | React Router v7 |
+| Backend | Node.js + Express v5 + TypeScript 6 |
+| ORM | Prisma v6 (PostgreSQL) |
+| Validation | Zod v4 (backend), React Hook Form + Zod (frontend) |
+| Auth | Supabase Auth |
+| State | Zustand v5 |
+| Feature flags | Flagsmith |
+| Deploy | Frontend → Vercel, Backend → Render |
+
+---
+
+## Commands
+
+> There is no root `package.json`. This is not an npm-workspace monorepo — `backend/` and `frontend/` are independent projects. Always `cd` into the one you're working on before running scripts. There is no test runner configured in either workspace.
+
+### Backend (`cd backend`)
+```bash
+npm run dev          # start with nodemon + ts-node on :4000
+npm run build        # tsc → dist/
+npm start            # node dist/server.js
+npm run lint         # eslint src/**/*.ts
+npm run format       # prettier --write src/**/*.{ts,json}
+npm run format:check # prettier --check (used in CI)
+npm run migrate      # prisma migrate dev
+npm run migrate:deploy  # prisma migrate deploy (production)
+npm run generate     # prisma generate (after schema changes)
+npm run studio       # prisma studio
+```
+
+### Frontend (`cd frontend`)
+```bash
+npm run dev          # Vite dev server on :5173
+npm run build        # tsc -b + vite build → dist/
+npm run preview      # preview production build locally
+npm run lint         # eslint
+npm run format       # prettier --write src/**/*.{ts,tsx,json}
+npm run format:check # prettier --check (used in CI)
+```
+
+### Local DB
+```bash
+docker compose up -d          # start Postgres on :5432
+docker compose down           # stop
+```
+
+---
+
+## Environment setup
+
+Copy and fill in both `.env.example` files before running anything:
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
+```
+
+For local dev the `DATABASE_URL` and `DIRECT_URL` in `backend/.env` point to the Docker Postgres container (credentials already set in `docker-compose.yml`).
+
+After filling in `.env`, run the first migration:
+```bash
+cd backend && npm run migrate
+```
+
+---
+
+## Architecture
+
+### Backend
+
+All routes are mounted under `/api/v1` in `src/routes/index.ts` (`auth`, `organisations`, `users`, `customers`, `quotations`, `invoices`, `payments`). Each business domain lives in `src/modules/<domain>/` with three files: `routes.ts`, `controller.ts`, and `service.ts`. The `auth` module is the exception — it has only `routes.ts` + `controller.ts` (it proxies Supabase Auth and holds no service logic).
+
+**Request lifecycle:**
+1. `src/app.ts` — helmet, cors, rate-limiter, then `/api/v1` router
+2. `src/middleware/auth.ts` — validates the Supabase JWT and attaches `req.user`
+3. `src/middleware/tenant.ts` (`requireTenant`) — looks up the `UserProfile` by `supabaseId`, resolves its `Organisation`, and attaches `req.org` (`{ id, name, slug }`); returns 403 if the user has no org
+4. Module controller — validates with Zod, calls service, returns via `ok()`/`fail()` helpers
+5. `src/middleware/error.ts` — global catch-all error handler
+
+**Key files:**
+- `src/config/env.ts` — Zod-validated env (crashes on startup if vars are missing)
+- `src/config/prisma.ts` — singleton PrismaClient
+- `src/config/supabase.ts` — Supabase admin client (service-role key)
+- `src/shared/utils/index.ts` — `ok()` / `fail()` response helpers
+- `src/shared/validators/index.ts` — shared Zod schemas used across modules
+- `prisma/schema.prisma` — canonical DB schema (Organisation → User, Customer, Quotation, Invoice, Payment)
+
+### Frontend
+
+`src/App.tsx` defines all React Router v7 routes. Protected routes check `isAuthenticated` from `useAuth` hook and redirect to `/login` otherwise.
+
+**Key wiring:**
+- `src/store/authStore.ts` — exports the Supabase client (`supabase`) and Zustand auth store; the client is imported by `src/api/client.ts` to attach the JWT
+- `src/store/tenantStore.ts` / `src/store/themeStore.ts` — the other two Zustand stores (current org, light/dark theme)
+- `src/api/client.ts` — axios instance with a request interceptor that reads the active Supabase session and injects `Authorization: Bearer <token>`. Per-domain callers (`src/api/customers.ts`, `invoices.ts`, `quotations.ts`, `payments.ts`, `auth.ts`) wrap this client — add new API calls there, not inline in components.
+- `src/hooks/` — `useAuth` subscribes to `supabase.auth.onAuthStateChange` and syncs the store; `useAuthInit` / `useThemeInit` bootstrap state on mount; `useTenant` reads the active org
+- `src/components/layout/AppShell.tsx` — shell wrapper with Sidebar + Header + `<Outlet />`; reusable primitives live in `src/components/ui/` (Button, Card, Input, Modal, Badge, ThemeToggle)
+- New users flow through onboarding (`src/pages/onboarding/CompleteProfile.tsx` → `CompanySetup.tsx`) before reaching the dashboard
+
+**Path alias:** `@/` maps to `src/` (configured in both `vite.config.ts` and `tsconfig.app.json`).
+
+---
+
+## Prisma schema summary
+
+```
+Organisation → UserProfile (many)   // UserProfile.supabaseId links to Supabase Auth
+Organisation → Customer (many)
+Organisation → Quotation (many) → QuotationItem (many)
+                                 ↘ Invoice (many) → InvoiceItem (many)
+                                                  ↘ Payment (many)
+```
+
+Enums: `OrgRole`, `SystemRole`, `QuotationStatus`, `InvoiceStatus`, `PaymentMethod`.
+
+All tenant-scoped entities carry `orgId` — always filter by it to enforce tenant isolation. The DB user identity is `UserProfile` (keyed to Supabase Auth via `supabaseId`), not a bare `User`.
+
+---
+
+## CI/CD
+
+`.github/workflows/ci.yml` runs lint + build for both workspaces on every push/PR to `main` or `develop`.
+
+Deploy config: `frontend/vercel.json` (SPA rewrites), `backend/render.yaml` (Render web service).
+
+---
+
+## Design system (read before building any UI)
+
+`docs/BIZUNITY_DESIGN_PRINCIPLES.md` is a mandatory brand brief — treat it as a system-level design brief whenever generating, scaffolding, or refining any BizUnity UI. BizUnity is a premium SME SaaS product for the Southern African market: gold (`--brand-gold: #C9A24D`) on near-black, minimal and boutique-fintech in feel. Use the exact CSS custom-property tokens defined there (`--brand-*`, `--text-*`, `--bg-*`); never substitute generic Tailwind defaults like `blue-500` or `gray-200`.
+
+`docs/BizUnity_MVP1_Technical_Implementation.docx` holds the MVP1 technical spec.
+
+**Building pages:** follow the shipping convention in `src/pages/onboarding/CompanySetup.tsx` — inline Tailwind referencing the `var(--color-*)` tokens in `src/index.css`, with `amber-500` as the gold accent, and React Hook Form + Zod for forms. The `src/components/ui/` primitives (`Button`, `Badge`) reference `btn`/`badge` classes that are **not defined** in `index.css`, and `Card`/`Input`/`Modal` are hardcoded light-mode — do not use them as-is (see `docs/solutions/conventions/frontend-ui-tokens-not-ui-primitives.md`).
+
+---
+
+## Compound engineering workflow
+
+Every piece of work should leave the project easier to work on next time. The loop is
+**Plan → Implement → Report → Learn → Update context**, and it is enforced by the `/compound`
+command plus a `Stop` hook (see `.Codex/`).
+
+### Artefacts (local working notes — gitignored, not committed)
+
+| Artefact | Location | Naming | When |
+|---|---|---|---|
+| Plan | `docs/plans/` | `YYYY-MM-DD-<type>-<slug>-plan.md` | before / while building |
+| Implementation report | `docs/reports/` | `YYYY-MM-DD-<slug>-report.md` | after building |
+| Learning | `docs/solutions/<category>/` | `<slug>.md` (+ YAML frontmatter) | after building, if non-obvious |
+| Vocabulary glossary | `CONCEPTS.md` (repo root) | one accreting file | when new domain terms appear |
+
+`<type>` ∈ `feat` `fix` `chore` `refactor` `docs`. `<category>` ∈ `bug-fixes/`
+`architecture-patterns/` `conventions/` `developer-experience/` `security-issues/`
+`integration-issues/` `tooling-decisions/`. Templates for each artefact live in
+`.Codex/templates/`. These paths are gitignored on purpose: the **method** (this section, the
+command, the hook, the templates) is shared; the **notes** stay local.
+
+### The rule — after completing any implementation
+
+Before ending, run the `/compound` capture routine (or do it inline):
+
+1. **Report** — write an implementation report to `docs/reports/` (what changed, why, files touched,
+   how it was verified, follow-ups, and any linked ClickUp task).
+2. **Learn** — if anything non-obvious was learned, capture it under `docs/solutions/<category>/`.
+   **Check for an existing solution doc and update it (bump `last_updated`) rather than duplicating.**
+   For a bug/fix, use the **Symptom / Cause / Fix / Date last verified** shape.
+3. **Vocabulary** — add any new domain terms to `CONCEPTS.md`.
+4. **Ways of working** — update *this* `AGENTS.md` only if a durable convention or workflow changed.
+
+The `Stop` hook nudges (blocks once, self-clearing) if source files under `backend/src`,
+`frontend/src`, or `backend/prisma` changed but no fresh report was captured. Writing the report
+clears it; errors in the hook never break the session.
