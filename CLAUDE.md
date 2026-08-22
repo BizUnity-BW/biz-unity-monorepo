@@ -127,9 +127,17 @@ All tenant-scoped entities carry `orgId` — always filter by it to enforce tena
 
 ## CI/CD
 
-`.github/workflows/ci.yml` runs lint + build for both workspaces on every push/PR to `main` or `develop`.
+`.github/workflows/ci.yml` runs format check + lint + build for both workspaces on every push/PR to
+`main` or `develop`. On a push to `main` (i.e. once a PR is merged), a `deploy-backend` job runs
+after the `backend` checks pass and deploys to Railway via the Railway CLI (needs the
+`RAILWAY_TOKEN` secret and `RAILWAY_SERVICE_NAME` repo variable set). There is no production
+environment yet — `main` is the only deploy target for now.
 
-Deploy config: `frontend/vercel.json` (SPA rewrites), `backend/render.yaml` (Render web service).
+The frontend is **not** deployed by this workflow: Vercel's own Git integration auto-deploys on
+push to `main` independently of GitHub Actions.
+
+Deploy config: `frontend/vercel.json` (SPA rewrites), `backend/railway.json` (Railway build/start
+commands, Nixpacks builder).
 
 ---
 

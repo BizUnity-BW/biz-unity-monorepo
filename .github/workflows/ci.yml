@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend:
-    name: Backend – lint & build
+    name: Backend – format, lint & build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -26,7 +26,7 @@ jobs:
       - run: npm run build
 
   frontend:
-    name: Frontend – lint & build
+    name: Frontend – format, lint & build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -42,3 +42,29 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
       - run: npm run build
+
+  # Frontend is deployed by Vercel's own Git integration (auto-deploys on push to main),
+  # so there is no frontend deploy job here. This job only ships the backend.
+  deploy-backend:
+    name: Deploy backend to Railway
+    runs-on: ubuntu-latest
+    needs: backend
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    concurrency:
+      group: deploy-backend-railway
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service "$RAILWAY_SERVICE" --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE: ${{ vars.RAILWAY_SERVICE_NAME }}
