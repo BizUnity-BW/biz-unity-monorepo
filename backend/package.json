@@ -6,7 +6,7 @@
     "dev": "nodemon",
     "build": "tsc --project tsconfig.json",
     "start": "node dist/server.js",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint .",
     "migrate": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
     "generate": "prisma generate",
@@ -30,6 +30,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.6.0",
@@ -38,6 +39,7 @@
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
+    "globals": "^14.0.0",
     "nodemon": "^3.1.14",
     "prettier": "^3.8.2",
     "prisma": "^6.19.3",
