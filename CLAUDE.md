@@ -149,6 +149,13 @@ commands, Nixpacks builder).
 
 **Building pages:** follow the shipping convention in `src/pages/onboarding/CompanySetup.tsx` — inline Tailwind referencing the `var(--color-*)` tokens in `src/index.css`, with `amber-500` as the gold accent, and React Hook Form + Zod for forms. The `src/components/ui/` primitives (`Button`, `Badge`) reference `btn`/`badge` classes that are **not defined** in `index.css`, and `Card`/`Input`/`Modal` are hardcoded light-mode — do not use them as-is (see `docs/solutions/conventions/frontend-ui-tokens-not-ui-primitives.md`).
 
+**Loading states:** for pages with a fixed layout and data-shaped holes (detail pages, the
+dashboard), wrap the content in `src/components/ui/SkeletonShimmer.tsx` and render it with a
+stand-in object from `src/lib/skeletonPlaceholders.ts` — the underlying library measures the
+*rendered* children, so a `loading ? spinner : content` shape produces an empty skeleton. Mark
+static chrome with `data-shimmer-ignore`. Do not use it for list pages or full-page bootstrap
+spinners (see `docs/solutions/integration-issues/shimmer-from-structure-needs-rendered-children.md`).
+
 ---
 
 ## Compound engineering workflow
