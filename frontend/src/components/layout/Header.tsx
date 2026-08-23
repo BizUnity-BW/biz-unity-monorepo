@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useThemeStore } from '../../store/themeStore';
 import ThemeToggle from '../ui/ThemeToggle';
+import Avatar from '../ui/Avatar';
 
 interface Props {
   onMenuClick: () => void;
@@ -30,7 +31,10 @@ export default function Header({ onMenuClick }: Props) {
   const logo = theme === 'dark' ? '/BizUnity_Logo_BB.png' : '/BizUnity_Logo_WB.png';
 
   return (
-    <header className="h-16 border-b border-[var(--color-border)] bg-[var(--color-header)] flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+    <header
+      data-print-hide
+      className="h-16 border-b border-[var(--color-border)] bg-[var(--color-header)] flex items-center justify-between px-4 sm:px-6 flex-shrink-0"
+    >
       {/* Left — hamburger (mobile only) to open the sidebar drawer */}
       <button
         onClick={onMenuClick}
@@ -66,9 +70,7 @@ export default function Header({ onMenuClick }: Props) {
 
         {/* Avatar + name */}
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-bold flex items-center justify-center">
-            {initials}
-          </div>
+          <Avatar url={profile?.avatarUrl} initials={initials} sizeClass="h-8 w-8" />
           <span className="text-sm text-[var(--color-text-muted)] hidden md:block">
             {displayName}
           </span>

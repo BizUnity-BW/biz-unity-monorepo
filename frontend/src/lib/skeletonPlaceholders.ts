@@ -1,4 +1,12 @@
-import type { Customer, Invoice, LineItem, Quotation } from '../types';
+import type {
+  Customer,
+  DocumentKind,
+  DocumentRecord,
+  Invoice,
+  LineItem,
+  Quotation,
+} from '../types';
+import { COMPLIANCE_KINDS } from './uploadKinds';
 
 /**
  * Stand-in objects rendered while a page is loading.
@@ -83,3 +91,36 @@ export const PLACEHOLDER_QUOTATIONS: Quotation[] = Array.from({ length: 4 }, (_,
   customer: PLACEHOLDER_CUSTOMER,
   items: [],
 }));
+
+export const PLACEHOLDER_DOCUMENT: DocumentRecord = {
+  id: 'skeleton-document',
+  organisationId: 'skeleton-org',
+  kind: 'COMPANY_REGISTRATION',
+  bucket: 'skeleton-bucket',
+  fileName: 'certificate-of-incorporation.pdf',
+  mimeType: 'application/pdf',
+  sizeBytes: 482_311,
+  uploadStatus: 'READY',
+  reviewStatus: 'PENDING',
+  rejectionReason: null,
+  reviewedAt: null,
+  documentNumber: 'CIPA/2019/12345',
+  issuedAt: ISO,
+  expiresAt: ISO,
+  paymentId: null,
+  userProfileId: null,
+  createdAt: ISO,
+  updatedAt: ISO,
+};
+
+/**
+ * One document per compliance slot, so every slot shimmers at its "filled" width
+ * rather than at the much narrower "Not uploaded" width.
+ */
+export const PLACEHOLDER_DOCUMENTS: DocumentRecord[] = COMPLIANCE_KINDS.map(
+  (kind: DocumentKind, index: number) => ({
+    ...PLACEHOLDER_DOCUMENT,
+    id: `skeleton-document-${index}`,
+    kind,
+  }),
+);

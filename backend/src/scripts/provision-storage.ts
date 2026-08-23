@@ -10,9 +10,9 @@
  * policies: Supabase denies by default, so only the service-role key can reach it.
  * Uploads still work because a signed upload token is itself the authorisation.
  */
-import { supabaseAdmin } from '../../src/config/supabase';
-import { env } from '../../src/config/env';
-import { MAX_DOCUMENT_BYTES, MAX_IMAGE_BYTES } from '../../src/shared/utils/storage';
+import { supabaseAdmin } from '../config/supabase';
+import { env } from '../config/env';
+import { MAX_DOCUMENT_BYTES, MAX_IMAGE_BYTES } from '../shared/utils/storage';
 
 interface BucketSpec {
   name: string;

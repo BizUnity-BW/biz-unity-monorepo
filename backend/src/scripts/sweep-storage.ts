@@ -12,14 +12,17 @@
  * There is no scheduler wired up yet; run it by hand or from a cron.
  */
 import { DocumentUploadStatus } from '@prisma/client';
-import { prisma } from '../../src/config/prisma';
-import { supabaseAdmin } from '../../src/config/supabase';
+import { prisma } from '../config/prisma';
+import { supabaseAdmin } from '../config/supabase';
 
+// `--hours 0` is allowed and means "everything currently pending", which is what you
+// want when draining after an incident. Only a negative or unparseable value falls
+// back to the default.
 function parseHours(args: string[]): number {
   const index = args.indexOf('--hours');
   if (index === -1) return 24;
   const value = Number(args[index + 1]);
-  return Number.isFinite(value) && value > 0 ? value : 24;
+  return Number.isFinite(value) && value >= 0 ? value : 24;
 }
 
 async function main(): Promise<void> {

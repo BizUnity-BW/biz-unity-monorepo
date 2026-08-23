@@ -34,7 +34,21 @@ npm run migrate      # prisma migrate dev
 npm run migrate:deploy  # prisma migrate deploy (production)
 npm run generate     # prisma generate (after schema changes)
 npm run studio       # prisma studio
+npm run storage:provision  # create/reconcile the Supabase Storage buckets (idempotent)
+npm run storage:sweep      # reap abandoned PENDING_UPLOAD documents (--hours N, --dry-run)
+npm run admin:grant -- <email> [--revoke]   # grant/revoke SYSTEM_ADMIN
 ```
+
+> **`backend/.env`'s `DATABASE_URL` points at live Supabase.** Never run `prisma migrate dev`
+> against it — it operates on production data and can offer to reset. Develop a migration with the
+> URL overridden to the local Docker Postgres, then `npm run migrate:deploy` for the real thing. A
+> required column on a non-empty table needs the generated SQL hand-split into add-nullable →
+> backfill → `SET NOT NULL`. See
+> `docs/solutions/bug-fixes/prisma-migration-history-vs-db-push-drift.md`.
+
+> Operational scripts live in `backend/src/scripts/`, **not** `prisma/scripts/` — the latter sits
+> outside `rootDir` so `npm run build` never typechecks it. They run under `ts-node --files`;
+> without `--files`, ts-node skips the tsconfig `include` and loses the ambient `@types/node`.
 
 ### Frontend (`cd frontend`)
 ```bash
@@ -155,6 +169,22 @@ stand-in object from `src/lib/skeletonPlaceholders.ts` — the underlying librar
 *rendered* children, so a `loading ? spinner : content` shape produces an empty skeleton. Mark
 static chrome with `data-shimmer-ignore`. Do not use it for list pages or full-page bootstrap
 spinners (see `docs/solutions/integration-issues/shimmer-from-structure-needs-rendered-children.md`).
+
+**Icons:** there is no icon library and none is being added. Shared glyphs live in
+`src/components/ui/icons.tsx` (components only, so `react-refresh/only-export-components` stays
+quiet); one-off icons are inlined as `<path>` in the Heroicons style already used by `Sidebar`.
+
+**File uploads:** never post a file to our API. The browser gets a signed upload URL and PUTs
+straight to Supabase Storage, then confirms. Use `useDocumentUpload` (which owns validation, the
+queue and leg-aware retry) with `DocumentUploader` for files or `ImageUploader` for a single
+replace-in-place image — do not call the storage or documents API directly from a page. Read
+`docs/solutions/architecture-patterns/three-legged-signed-url-uploads.md` first; the
+idempotent-confirm and `uploadStatus: READY` filtering rules are load-bearing.
+
+**Printing:** `index.css` has an `@media print` block that re-points the `--color-*` tokens for
+paper — without it this dark-first app prints white-on-white. Hide chrome with `data-print-hide`
+and let the shell unroll with `data-print-expand`. Always check a printable page in **both**
+themes.
 
 ---
 
