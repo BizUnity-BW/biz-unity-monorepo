@@ -13,6 +13,19 @@ export const defaultLimiter = env.RATE_LIMIT_ENABLED
     })
   : bypass;
 
+// Minting a signed upload URL is cheap for us but grants a write into storage, so
+// it gets a tighter budget than the app-wide 200. Generous enough for a user
+// uploading a whole compliance pack in one sitting.
+export const uploadLimiter = env.RATE_LIMIT_ENABLED
+  ? rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 60,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: { success: false, error: 'Too many uploads, please try again later.' },
+    })
+  : bypass;
+
 export const authLimiter = env.RATE_LIMIT_ENABLED
   ? rateLimit({
       windowMs: 15 * 60 * 1000,

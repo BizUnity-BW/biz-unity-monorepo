@@ -18,11 +18,14 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     return;
   }
 
+  // Deliberately no `systemRole` here. It used to be read from
+  // `data.user.app_metadata.system_role`, a Supabase attribute nothing in this
+  // codebase writes, so it always resolved to SYSTEM_USER. The authority is
+  // `UserProfile.systemRole`, attached as `req.profile` by requireTenant /
+  // requireSystemAdmin.
   (req as AuthenticatedRequest).user = {
     id: data.user.id,
     email: data.user.email ?? '',
-    systemRole:
-      (data.user.app_metadata?.system_role as 'SYSTEM_ADMIN' | 'SYSTEM_USER') ?? 'SYSTEM_USER',
   };
 
   next();

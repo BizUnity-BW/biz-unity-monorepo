@@ -4,11 +4,12 @@ import { ok, fail } from '../../shared/utils';
 import { AuthenticatedRequest } from '../../shared/types';
 import * as service from './service';
 
+// No avatarUrl: it used to accept any URL on the internet, and it is now owned by
+// the document upload flow, which writes it after the image lands in our own bucket.
 const updateSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
   phone: z.string().optional(),
-  avatarUrl: z.string().url().optional(),
 });
 
 export async function getMe(req: Request, res: Response): Promise<void> {

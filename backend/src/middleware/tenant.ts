@@ -26,5 +26,16 @@ export async function requireTenant(
     slug: profile.organisation.slug,
   };
 
+  // Carried through so handlers can attribute writes to a UserProfile — the audit
+  // trail and `recordedById` need this, and re-querying per handler would mean a
+  // second round trip for a row already loaded here.
+  authReq.profile = {
+    id: profile.id,
+    email: profile.email,
+    systemRole: profile.systemRole,
+    orgRole: profile.orgRole,
+    organisationId: profile.organisationId,
+  };
+
   next();
 }

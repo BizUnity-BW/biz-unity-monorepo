@@ -1,0 +1,190 @@
+import { DocumentKind, DocumentReviewStatus } from '@prisma/client';
+import { env } from '../../config/env';
+
+// Decimal megabytes, deliberately: Supabase parses a bucket's `fileSizeLimit`
+// string as powers of ten ("10MB" is 10_000_000 bytes), so using 1024*1024 here
+// would let a file pass our check and then be rejected by the bucket.
+const MB = 1000 * 1000;
+
+/** Byte ceilings, shared with `prisma/scripts/provision-storage.ts` so the API
+ *  check and the bucket configuration cannot drift apart. */
+export const MAX_DOCUMENT_BYTES = 10 * MB;
+export const MAX_IMAGE_BYTES = 2 * MB;
+
+const PDF_AND_IMAGE = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+] as const satisfies readonly string[];
+
+const IMAGE_ONLY = ['image/png', 'image/jpeg', 'image/webp'] as const satisfies readonly string[];
+
+/** Which of the two buckets a kind belongs in. Resolved to a name by `bucketFor`. */
+export type BucketKey = 'documents' | 'public';
+
+export interface KindRule {
+  bucket: BucketKey;
+  mimeTypes: readonly string[];
+  maxBytes: number;
+  /** The review status a document of this kind takes once its bytes are confirmed. */
+  reviewOnReady: DocumentReviewStatus;
+  /**
+   * Only one live document of this kind per owner (the organisation, or the user
+   * for an avatar). Confirming a new one supersedes the previous.
+   */
+  singleton: boolean;
+  /**
+   * Whether a superseded document keeps its stored object. Compliance documents do:
+   * a funder may need to see the certificate that was current at the time. Logos and
+   * avatars do not — nobody audits a replaced logo.
+   */
+  retainSuperseded: boolean;
+  /** Collects documentNumber / issuedAt / expiresAt and appears in the KYC pack. */
+  compliance: boolean;
+}
+
+function complianceRule(): KindRule {
+  return {
+    bucket: 'documents',
+    mimeTypes: PDF_AND_IMAGE,
+    maxBytes: MAX_DOCUMENT_BYTES,
+    // A compliance document carries its own verdict, so it enters the admin queue.
+    reviewOnReady: DocumentReviewStatus.PENDING,
+    singleton: true,
+    retainSuperseded: true,
+    compliance: true,
+  };
+}
+
+function imageRule(): KindRule {
+  return {
+    bucket: 'public',
+    mimeTypes: IMAGE_ONLY,
+    maxBytes: MAX_IMAGE_BYTES,
+    reviewOnReady: DocumentReviewStatus.NOT_REQUIRED,
+    singleton: true,
+    retainSuperseded: false,
+    compliance: false,
+  };
+}
+
+export const KIND_RULES: Record<DocumentKind, KindRule> = {
+  // Proof of payment carries no verdict of its own — the Payment holds it — and a
+  // payment may have several files, so it is the one non-singleton document kind.
+  PROOF_OF_PAYMENT: {
+    bucket: 'documents',
+    mimeTypes: PDF_AND_IMAGE,
+    maxBytes: MAX_DOCUMENT_BYTES,
+    reviewOnReady: DocumentReviewStatus.NOT_REQUIRED,
+    singleton: false,
+    retainSuperseded: true,
+    compliance: false,
+  },
+
+  COMPANY_REGISTRATION: complianceRule(),
+  TAX_CLEARANCE: complianceRule(),
+  TRADE_LICENCE: complianceRule(),
+  VAT_CERTIFICATE: complianceRule(),
+  BANK_CONFIRMATION: complianceRule(),
+  DIRECTOR_ID: complianceRule(),
+  PROOF_OF_ADDRESS: complianceRule(),
+
+  ORGANISATION_LOGO: imageRule(),
+  USER_AVATAR: imageRule(),
+
+  OTHER: {
+    bucket: 'documents',
+    mimeTypes: PDF_AND_IMAGE,
+    maxBytes: MAX_DOCUMENT_BYTES,
+    reviewOnReady: DocumentReviewStatus.NOT_REQUIRED,
+    singleton: false,
+    retainSuperseded: true,
+    compliance: false,
+  },
+};
+
+/** The compliance pack, in the order the settings page renders its slots. */
+export const COMPLIANCE_KINDS: DocumentKind[] = (Object.keys(KIND_RULES) as DocumentKind[]).filter(
+  (kind) => KIND_RULES[kind].compliance,
+);
+
+export function bucketFor(kind: DocumentKind): string {
+  return KIND_RULES[kind].bucket === 'public'
+    ? env.SUPABASE_BUCKET_PUBLIC
+    : env.SUPABASE_BUCKET_DOCUMENTS;
+}
+
+export function isPublicKind(kind: DocumentKind): boolean {
+  return KIND_RULES[kind].bucket === 'public';
+}
+
+/**
+ * Reduce an uploaded filename to something safe to embed in a storage key.
+ *
+ * The original name is kept verbatim on the `Document` row for display; only the
+ * path uses this. Anything outside `[A-Za-z0-9._-]` becomes a hyphen, which also
+ * neutralises `/`, `\` and `..` — so path traversal cannot escape the org prefix.
+ */
+export function sanitiseFileName(fileName: string): string {
+  const base = fileName.split(/[\\/]/).pop() ?? 'file';
+  const cleaned = base
+    .replace(/[^A-Za-z0-9._-]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^[.-]+/, '')
+    .slice(0, 100);
+  return cleaned.length > 0 ? cleaned.toLowerCase() : 'file';
+}
+
+export interface StoragePathInput {
+  organisationId: string;
+  kind: DocumentKind;
+  /** Random per-upload token; see `newPathToken`. */
+  token: string;
+  fileName: string;
+  paymentId?: string | null;
+  userProfileId?: string | null;
+}
+
+/**
+ * A fresh token to make one storage key unique.
+ *
+ * Deliberately not the document's id: the id is a cuid generated by the database on
+ * insert, and the path has to be known before that insert. A separate token keeps
+ * the id convention intact and costs nothing, since the path is never parsed.
+ */
+export function newPathToken(): string {
+  return crypto.randomUUID();
+}
+
+/**
+ * Build the storage key for a document.
+ *
+ * Every path is prefixed with the organisation id, so `storage.foldername(name)[1]`
+ * is the tenant boundary if Storage RLS policies are ever added. The token makes each
+ * key unique, which means no `upsert`, no collisions, and no stale-cache problem when
+ * a logo or avatar is replaced — the new file is simply a new URL.
+ */
+export function buildStoragePath(input: StoragePathInput): string {
+  const { organisationId, kind, token, fileName, paymentId, userProfileId } = input;
+  const safe = `${token}-${sanitiseFileName(fileName)}`;
+
+  switch (kind) {
+    case DocumentKind.PROOF_OF_PAYMENT:
+      return `${organisationId}/payments/${paymentId}/${safe}`;
+    case DocumentKind.ORGANISATION_LOGO:
+      return `${organisationId}/logo/${safe}`;
+    case DocumentKind.USER_AVATAR:
+      return `${organisationId}/avatars/${userProfileId}/${safe}`;
+    default:
+      return `${organisationId}/compliance/${kind.toLowerCase()}/${safe}`;
+  }
+}
+
+/** Split a storage key into the directory Supabase lists on, and the leaf name. */
+export function splitStoragePath(storagePath: string): { dir: string; name: string } {
+  const index = storagePath.lastIndexOf('/');
+  return index === -1
+    ? { dir: '', name: storagePath }
+    : { dir: storagePath.slice(0, index), name: storagePath.slice(index + 1) };
+}
