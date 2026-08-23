@@ -5,6 +5,8 @@ import { ok } from '../../shared/utils';
 import { AuthenticatedRequest } from '../../shared/types';
 import paymentRoutes from './payments/routes';
 import documentRoutes from './documents/routes';
+import organisationRoutes from './organisations/routes';
+import userRoutes from './users/routes';
 
 const router = Router();
 
@@ -20,5 +22,7 @@ router.get('/ping', (req: Request, res: Response) => {
 
 router.use('/payments', paymentRoutes);
 router.use('/documents', documentRoutes);
+router.use('/organisations', organisationRoutes);
+router.use('/users', userRoutes);
 
 export default router;

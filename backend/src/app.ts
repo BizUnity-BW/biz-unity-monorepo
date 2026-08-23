@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { env } from './config/env';
 import { defaultLimiter } from './middleware/rateLimiter';
 import { errorHandler } from './middleware/error';
 import router from './routes';
@@ -9,7 +10,8 @@ export function createApp() {
   const app = express();
 
   app.use(helmet());
-  app.use(cors({ origin: process.env.FRONTEND_URL ?? 'http://localhost:5173', credentials: true }));
+  // Two browser apps on two origins: the tenant app and the admin console.
+  app.use(cors({ origin: [env.FRONTEND_URL, env.ADMIN_URL], credentials: true }));
   app.use(express.json());
   app.use(defaultLimiter);
 

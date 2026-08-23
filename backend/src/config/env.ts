@@ -22,6 +22,8 @@ const envSchema = z.object({
   // Read by app.ts for the CORS origin. Was previously only in .env.example, so a
   // typo failed open to localhost instead of failing loudly at startup.
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
+  // The admin console is a separate app on its own origin, so CORS needs both.
+  ADMIN_URL: z.string().url().default('http://localhost:5174'),
   FLAGSMITH_ENVIRONMENT_KEY: z.string().optional(),
   RATE_LIMIT_ENABLED: z
     .string()
