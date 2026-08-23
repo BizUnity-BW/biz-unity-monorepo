@@ -11,6 +11,9 @@
     "migrate:deploy": "prisma migrate deploy",
     "generate": "prisma generate",
     "studio": "prisma studio",
+    "storage:provision": "ts-node prisma/scripts/provision-storage.ts",
+    "storage:sweep": "ts-node prisma/scripts/sweep-storage.ts",
+    "admin:grant": "ts-node prisma/scripts/grant-admin.ts",
     "format": "prettier --write \"src/**/*.{ts,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,json}\""
   },

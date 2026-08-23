@@ -7,9 +7,10 @@ export function getUserBySupabaseId(supabaseId: string) {
   });
 }
 
+// avatarUrl is deliberately absent: it is written only by the document upload flow.
 export function updateUser(
   supabaseId: string,
-  data: Partial<{ firstName: string; lastName: string; phone: string; avatarUrl: string }>,
+  data: Partial<{ firstName: string; lastName: string; phone: string }>,
 ) {
   return prisma.userProfile.update({ where: { supabaseId }, data });
 }
