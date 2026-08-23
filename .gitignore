@@ -28,6 +28,7 @@ Thumbs.db
 
 # Vite
 frontend/.vite/
+admin/.vite/
 
 # Coverage
 coverage/
