@@ -11,7 +11,7 @@
  * The profile must already exist — sign up through the app first.
  */
 import { SystemRole } from '@prisma/client';
-import { prisma } from '../../src/config/prisma';
+import { prisma } from '../config/prisma';
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
