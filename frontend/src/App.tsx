@@ -20,6 +20,8 @@ import QuotationForm from './pages/quotations/QuotationForm';
 import InvoiceList from './pages/invoices/InvoiceList';
 import InvoiceDetail from './pages/invoices/InvoiceDetail';
 import PaymentHistory from './pages/payments/PaymentHistory';
+import ConfigError from './components/ConfigError';
+import { isConfigured, missingEnvVars } from './lib/env';
 
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
@@ -82,6 +84,10 @@ function PasswordRecoveryListener() {
 export default function App() {
   useAuthInit();
   useThemeInit();
+
+  // Before anything tries to reach Supabase with placeholder credentials, say what
+  // is missing. Hooks run first so their order stays unconditional.
+  if (!isConfigured) return <ConfigError missing={missingEnvVars} />;
 
   return (
     <BrowserRouter>
