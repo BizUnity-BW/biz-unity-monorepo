@@ -20,7 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-> There is no root `package.json`. This is not an npm-workspace monorepo — `backend/` and `frontend/` are independent projects. Always `cd` into the one you're working on before running scripts. There is no test runner configured in either workspace.
+> There is no root `package.json`. This is not an npm-workspace monorepo — `backend/`, `frontend/` and `admin/` are independent projects. Always `cd` into the one you're working on before running scripts. There is no test runner configured in any workspace.
 
 ### Backend (`cd backend`)
 ```bash
@@ -59,6 +59,18 @@ npm run lint         # eslint
 npm run format       # prettier --write src/**/*.{ts,tsx,json}
 npm run format:check # prettier --check (used in CI)
 ```
+
+### Admin console (`cd admin`)
+```bash
+npm run dev          # Vite dev server on :5174 (runs alongside the tenant app on :5173)
+npm run build        # tsc -b + vite build → dist/
+npm run lint         # eslint
+npm run format:check # prettier --check (used in CI)
+```
+
+> The admin console is the **platform back-office**: BizUnity staff, cross-tenant. An admin is a
+> `UserProfile` with `systemRole = SYSTEM_ADMIN` and `organisationId = null`. Grant it with
+> `cd backend && npm run admin:grant -- <email>` — there is no self-signup in the admin app.
 
 ### Local DB
 ```bash
@@ -120,6 +132,26 @@ All routes are mounted under `/api/v1` in `src/routes/index.ts` (`auth`, `organi
 - New users flow through onboarding (`src/pages/onboarding/CompleteProfile.tsx` → `CompanySetup.tsx`) before reaching the dashboard
 
 **Path alias:** `@/` maps to `src/` (configured in both `vite.config.ts` and `tsconfig.app.json`).
+
+### Admin console (`admin/`)
+
+A third independent project on the same stack as `frontend/`, sharing this backend, database and
+Supabase project. It talks only to `/api/v1/admin/*`, which applies `requireAuth` +
+`requireSystemAdmin` **once at the parent router** (`backend/src/modules/admin/routes.ts`) so a
+sub-route added later cannot ship unguarded.
+
+Two rules that are load-bearing:
+
+- **Admin services deliberately do not filter by `orgId`.** That is the point of the routes, and it
+  is why they live only under `backend/src/modules/admin/`. A missing `organisationId` filter is
+  intentional there and a bug everywhere else — never import across that boundary.
+- **`SystemAdminRoute` must not reuse the tenant app's `ProfileGuard`.** That guard sends any profile
+  without an `organisationId` to `/onboarding/company`, and platform admins have no organisation, so
+  it would trap every one of them in a loop they can never complete.
+
+Shared frontend code (design tokens, api client, auth store, types, a few `ui/` primitives) is
+**copied**, not extracted into a package, matching the no-workspaces convention. The copied set is
+tracked in ClickUp 86cb8q62z; if it drifts painfully, the exit ramp is npm workspaces.
 
 ---
 
