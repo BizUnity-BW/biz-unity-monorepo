@@ -27,7 +27,7 @@ responsive app shell with light/dark theming. Remaining work is tracked in Click
 | Frontend | React 19, Vite, TypeScript, Tailwind CSS v4, React Router v7, Zustand |
 | Backend | Node.js, Express 5, TypeScript, Prisma 6 (PostgreSQL), Zod |
 | Auth | Supabase Auth |
-| Deploy | Frontend → Vercel, Backend → Render |
+| Deploy | Frontend → Vercel, Backend → Railway |
 
 ## Repository layout
 
@@ -188,8 +188,15 @@ The repo ships two project slash commands (Claude Code):
 ## Deployment
 
 - **Frontend → Vercel** — SPA rewrites in [`frontend/vercel.json`](frontend/vercel.json).
-- **Backend → Render** — service config in [`backend/render.yaml`](backend/render.yaml). Set the same
-  env variables there; run `npm run migrate:deploy` on release; ensure `NODE_ENV=production`.
+- **Backend → Railway** — service config in [`backend/railway.json`](backend/railway.json), deployed
+  by the `deploy-backend` job in CI on every push to `main`. Set the same env variables in the Railway
+  service, including **`DIRECT_URL`** (the non-pooled connection — a pooled `DATABASE_URL` on `:6543`
+  is unreliable for DDL and advisory locks), and `NODE_ENV=production`.
+
+  **Migrations run automatically** via `preDeployCommand` (`npm run migrate:deploy`), before the new
+  version takes traffic. A failed migration aborts the release and leaves the previous version
+  serving, so there is no window where deployed code outruns its schema. Do not run it by hand, and
+  never swap that hook for `migrate dev` or `db push`.
 
 ---
 

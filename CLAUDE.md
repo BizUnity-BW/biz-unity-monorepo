@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Auth | Supabase Auth |
 | State | Zustand v5 |
 | Feature flags | Flagsmith |
-| Deploy | Frontend → Vercel, Backend → Render |
+| Deploy | Frontend → Vercel, Backend → Railway |
 
 ---
 
@@ -181,6 +181,17 @@ environment yet — `main` is the only deploy target for now.
 
 The frontend is **not** deployed by this workflow: Vercel's own Git integration auto-deploys on
 push to `main` independently of GitHub Actions.
+
+**Migrations run on deploy**, via `preDeployCommand` in `backend/railway.json`
+(`npm run migrate:deploy`). Railway runs it before the new version takes traffic, so a failed
+migration aborts the release and leaves the previous version serving — rather than replacing it with
+code whose tables do not exist. Two consequences worth knowing:
+
+- **Never put `migrate dev` or `db push` in that hook.** Only `migrate deploy`, which respects
+  existing history. The deployed database's `initial_schema` row was baselined by hand
+  (`applied_steps_count = 0`), so anything that tries to re-derive history will fight it.
+- `migrate deploy` needs **`DIRECT_URL`** (the non-pooled connection) set in the Railway
+  environment. A pooled `DATABASE_URL` on `:6543` is unreliable for DDL and advisory locks.
 
 Deploy config: `frontend/vercel.json` (SPA rewrites), `backend/railway.json` (Railway build/start
 commands, Nixpacks builder).
