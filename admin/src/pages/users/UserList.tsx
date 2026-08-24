@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { usersApi } from '../../api/users';
 import { formatDate, errMessage } from '../../lib/format';
 import Pagination from '../../components/ui/Pagination';
+import SkeletonShimmer from '../../components/ui/SkeletonShimmer';
+import { PLACEHOLDER_USERS } from '../../lib/skeletonPlaceholders';
 import type { AdminUser, OrgRole, PaginationMeta, SystemRole } from '../../types';
 
 export default function UserList() {
-  const [rows, setRows] = useState<AdminUser[]>([]);
+  const [loadedRows, setLoadedRows] = useState<AdminUser[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | undefined>();
   const [search, setSearch] = useState('');
   const [systemRole, setSystemRole] = useState<'' | SystemRole>('');
@@ -33,7 +35,7 @@ export default function UserList() {
             organisationId: orgFilter || undefined,
           });
           if (ignore) return;
-          setRows(res.data.data);
+          setLoadedRows(res.data.data);
           setMeta(res.data.meta);
           setError(null);
         } catch (err) {
@@ -49,6 +51,10 @@ export default function UserList() {
       clearTimeout(timer);
     };
   }, [page, search, systemRole, orgRole, orgFilter]);
+
+  // See OrganisationList for why the library is used here despite the convention
+  // doc's note about list pages. Only the table is wrapped; filters stay usable.
+  const rows = loading ? PLACEHOLDER_USERS : loadedRows;
 
   const selectClass =
     'rounded-lg border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-3 py-2 text-sm text-[var(--color-text)] outline-none focus:border-amber-500';
@@ -114,79 +120,75 @@ export default function UserList() {
         </p>
       )}
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-        <table className="w-full min-w-[44rem] text-sm">
-          <thead>
-            <tr className="border-b border-[var(--color-border)] text-left text-xs tracking-wider text-[var(--color-text-secondary)] uppercase">
-              <th className="px-4 py-3 font-semibold">User</th>
-              <th className="px-4 py-3 font-semibold">Organisation</th>
-              <th className="px-4 py-3 font-semibold">Org role</th>
-              <th className="px-4 py-3 font-semibold">Platform</th>
-              <th className="px-4 py-3 font-semibold">Joined</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--color-border-subtle)]">
-            {loading ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-[var(--color-text-secondary)]">
-                  Loading…
-                </td>
+      <SkeletonShimmer loading={loading}>
+        <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+          <table className="w-full min-w-[44rem] text-sm">
+            <thead>
+              <tr className="border-b border-[var(--color-border)] text-left text-xs tracking-wider text-[var(--color-text-secondary)] uppercase">
+                <th className="px-4 py-3 font-semibold">User</th>
+                <th className="px-4 py-3 font-semibold">Organisation</th>
+                <th className="px-4 py-3 font-semibold">Org role</th>
+                <th className="px-4 py-3 font-semibold">Platform</th>
+                <th className="px-4 py-3 font-semibold">Joined</th>
               </tr>
-            ) : rows.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-[var(--color-text-secondary)]">
-                  No users match these filters.
-                </td>
-              </tr>
-            ) : (
-              rows.map((user) => (
-                <tr
-                  key={user.id}
-                  className="transition-colors hover:bg-[var(--color-surface-hover)]"
-                >
-                  <td className="px-4 py-3">
-                    <Link to={`/users/${user.id}`} className="block">
-                      <span className="font-medium text-[var(--color-text)]">
-                        {[user.firstName, user.lastName].filter(Boolean).join(' ') || '—'}
-                      </span>
-                      <span className="block text-xs text-[var(--color-text-muted)]">
-                        {user.email}
-                      </span>
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-[var(--color-text-secondary)]">
-                    {user.organisation ? (
-                      <Link
-                        to={`/organisations/${user.organisation.id}`}
-                        className="hover:text-amber-500"
-                      >
-                        {user.organisation.name}
-                      </Link>
-                    ) : (
-                      <span className="text-[var(--color-text-muted)]">None</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--color-text-secondary)]">
-                    {user.organisation ? user.orgRole : '—'}
-                  </td>
-                  <td className="px-4 py-3">
-                    {user.systemRole === 'SYSTEM_ADMIN' ? (
-                      <span className="rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-amber-500 uppercase">
-                        Admin
-                      </span>
-                    ) : (
-                      <span className="text-[var(--color-text-muted)]">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--color-text-secondary)]">
-                    {formatDate(user.createdAt)}
+            </thead>
+            <tbody className="divide-y divide-[var(--color-border-subtle)]">
+              {!loading && rows.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-6 text-[var(--color-text-secondary)]">
+                    No users match these filters.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : (
+                rows.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="transition-colors hover:bg-[var(--color-surface-hover)]"
+                  >
+                    <td className="px-4 py-3">
+                      <Link to={`/users/${user.id}`} className="block">
+                        <span className="font-medium text-[var(--color-text)]">
+                          {[user.firstName, user.lastName].filter(Boolean).join(' ') || '—'}
+                        </span>
+                        <span className="block text-xs text-[var(--color-text-muted)]">
+                          {user.email}
+                        </span>
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-[var(--color-text-secondary)]">
+                      {user.organisation ? (
+                        <Link
+                          to={`/organisations/${user.organisation.id}`}
+                          className="hover:text-amber-500"
+                        >
+                          {user.organisation.name}
+                        </Link>
+                      ) : (
+                        <span className="text-[var(--color-text-muted)]">None</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-[var(--color-text-secondary)]">
+                      {user.organisation ? user.orgRole : '—'}
+                    </td>
+                    <td className="px-4 py-3">
+                      {user.systemRole === 'SYSTEM_ADMIN' ? (
+                        <span className="rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-amber-500 uppercase">
+                          Admin
+                        </span>
+                      ) : (
+                        <span className="text-[var(--color-text-muted)]">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-[var(--color-text-secondary)]">
+                      {formatDate(user.createdAt)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </SkeletonShimmer>
 
       <Pagination meta={meta} onPage={setPage} />
     </div>

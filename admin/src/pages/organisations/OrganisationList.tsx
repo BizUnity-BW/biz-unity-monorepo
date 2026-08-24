@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { organisationsApi } from '../../api/organisations';
 import { formatDate, errMessage } from '../../lib/format';
 import Pagination from '../../components/ui/Pagination';
+import SkeletonShimmer from '../../components/ui/SkeletonShimmer';
+import { PLACEHOLDER_ORGANISATIONS } from '../../lib/skeletonPlaceholders';
 import type { AdminOrganisation, PaginationMeta } from '../../types';
 
 /** Read-only. Editing and suspend/restore are ClickUp 86cb8q623. */
 export default function OrganisationList() {
-  const [rows, setRows] = useState<AdminOrganisation[]>([]);
+  const [loadedRows, setLoadedRows] = useState<AdminOrganisation[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | undefined>();
   const [search, setSearch] = useState('');
   const [includeDeleted, setIncludeDeleted] = useState(false);
@@ -26,7 +28,7 @@ export default function OrganisationList() {
         try {
           const res = await organisationsApi.list({ page, search, includeDeleted });
           if (ignore) return;
-          setRows(res.data.data);
+          setLoadedRows(res.data.data);
           setMeta(res.data.meta);
           setError(null);
         } catch (err) {
@@ -42,6 +44,13 @@ export default function OrganisationList() {
       clearTimeout(timer);
     };
   }, [page, search, includeDeleted]);
+
+  // Placeholder rows so the table shimmers instead of showing a bare "Loading…".
+  // The convention doc notes this library gains nothing over a hand-rolled skeleton
+  // on list pages — true, but it keeps one visual language across the app and brings
+  // the `inert` guard with it. Only the table is wrapped, so the filters above stay
+  // usable while a search is in flight.
+  const rows = loading ? PLACEHOLDER_ORGANISATIONS : loadedRows;
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -80,69 +89,65 @@ export default function OrganisationList() {
         </p>
       )}
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-        <table className="w-full min-w-[46rem] text-sm">
-          <thead>
-            <tr className="border-b border-[var(--color-border)] text-left text-xs tracking-wider text-[var(--color-text-secondary)] uppercase">
-              <th className="px-4 py-3 font-semibold">Organisation</th>
-              <th className="px-4 py-3 font-semibold">Currency</th>
-              <th className="px-4 py-3 text-right font-semibold">Users</th>
-              <th className="px-4 py-3 text-right font-semibold">Customers</th>
-              <th className="px-4 py-3 text-right font-semibold">Invoices</th>
-              <th className="px-4 py-3 font-semibold">Created</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--color-border-subtle)]">
-            {loading ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-[var(--color-text-secondary)]">
-                  Loading…
-                </td>
+      <SkeletonShimmer loading={loading}>
+        <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+          <table className="w-full min-w-[46rem] text-sm">
+            <thead>
+              <tr className="border-b border-[var(--color-border)] text-left text-xs tracking-wider text-[var(--color-text-secondary)] uppercase">
+                <th className="px-4 py-3 font-semibold">Organisation</th>
+                <th className="px-4 py-3 font-semibold">Currency</th>
+                <th className="px-4 py-3 text-right font-semibold">Users</th>
+                <th className="px-4 py-3 text-right font-semibold">Customers</th>
+                <th className="px-4 py-3 text-right font-semibold">Invoices</th>
+                <th className="px-4 py-3 font-semibold">Created</th>
               </tr>
-            ) : rows.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-[var(--color-text-secondary)]">
-                  {search ? `No organisations match “${search}”.` : 'No organisations yet.'}
-                </td>
-              </tr>
-            ) : (
-              rows.map((org) => (
-                <tr
-                  key={org.id}
-                  className="transition-colors hover:bg-[var(--color-surface-hover)]"
-                >
-                  <td className="px-4 py-3">
-                    <Link to={`/organisations/${org.id}`} className="block">
-                      <span className="font-medium text-[var(--color-text)]">{org.name}</span>
-                      {org.deletedAt && (
-                        <span className="ml-2 rounded border border-red-500/30 bg-red-500/10 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-red-400 uppercase">
-                          Suspended
-                        </span>
-                      )}
-                      <span className="block font-mono text-xs text-[var(--color-text-muted)]">
-                        {org.slug}
-                      </span>
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-[var(--color-text-secondary)]">{org.currency}</td>
-                  <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">
-                    {org._count.userProfiles}
-                  </td>
-                  <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">
-                    {org._count.customers}
-                  </td>
-                  <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">
-                    {org._count.invoices}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--color-text-secondary)]">
-                    {formatDate(org.createdAt)}
+            </thead>
+            <tbody className="divide-y divide-[var(--color-border-subtle)]">
+              {!loading && rows.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-6 text-[var(--color-text-secondary)]">
+                    {search ? `No organisations match “${search}”.` : 'No organisations yet.'}
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : (
+                rows.map((org) => (
+                  <tr
+                    key={org.id}
+                    className="transition-colors hover:bg-[var(--color-surface-hover)]"
+                  >
+                    <td className="px-4 py-3">
+                      <Link to={`/organisations/${org.id}`} className="block">
+                        <span className="font-medium text-[var(--color-text)]">{org.name}</span>
+                        {org.deletedAt && (
+                          <span className="ml-2 rounded border border-red-500/30 bg-red-500/10 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-red-400 uppercase">
+                            Suspended
+                          </span>
+                        )}
+                        <span className="block font-mono text-xs text-[var(--color-text-muted)]">
+                          {org.slug}
+                        </span>
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-[var(--color-text-secondary)]">{org.currency}</td>
+                    <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">
+                      {org._count.userProfiles}
+                    </td>
+                    <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">
+                      {org._count.customers}
+                    </td>
+                    <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">
+                      {org._count.invoices}
+                    </td>
+                    <td className="px-4 py-3 text-[var(--color-text-secondary)]">
+                      {formatDate(org.createdAt)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </SkeletonShimmer>
 
       <Pagination meta={meta} onPage={setPage} />
     </div>
