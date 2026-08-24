@@ -107,9 +107,20 @@ All routes are mounted under `/api/v1` in `src/routes/index.ts` (`auth`, `organi
 **Request lifecycle:**
 1. `src/app.ts` — helmet, cors, rate-limiter, then `/api/v1` router
 2. `src/middleware/auth.ts` — validates the Supabase JWT and attaches `req.user`
-3. `src/middleware/tenant.ts` (`requireTenant`) — looks up the `UserProfile` by `supabaseId`, resolves its `Organisation`, and attaches `req.org` (`{ id, name, slug }`); returns 403 if the user has no org
-4. Module controller — validates with Zod, calls service, returns via `ok()`/`fail()` helpers
-5. `src/middleware/error.ts` — global catch-all error handler
+3. `src/middleware/tenant.ts` (`requireTenant`) — looks up the `UserProfile` by `supabaseId`, resolves its `Organisation`, and attaches `req.org` (`{ id, name, slug }`) plus `req.profile` (including `orgRole`); returns 403 if the user has no org
+4. `src/middleware/orgRole.ts` (`requireOrgRole(...roles)`) — **per-route** org-role guard, on the restricted routes only
+5. Module controller — validates with Zod, calls service, returns via `ok()`/`fail()` helpers
+6. `src/middleware/error.ts` — global catch-all error handler
+
+**Authorization has two orthogonal axes.** `systemRole` (platform) is guarded once at the parent
+router by `requireSystemAdmin`; `orgRole` (OWNER/MANAGER/SALES, within an org) is guarded
+**per-route** by `requireOrgRole`, because the permission matrix is per-verb — SALES may `POST` a
+payment but not `DELETE` one, which no parent-level guard can express. A tenant route with no
+`requireOrgRole` is open to all three roles *by design*; each route file carries a comment saying so.
+**If you add a restricted tenant route, add its guard in the same commit** — a later sweep cannot
+tell a deliberate omission from a forgotten one. Note `actorRole` in the payments/documents services
+is audit provenance snapshotted onto `VerificationEvent`, **not** an authorization check; nothing
+branches on it. See `docs/solutions/conventions/org-role-authorisation-per-route.md`.
 
 **Key files:**
 - `src/config/env.ts` — Zod-validated env (crashes on startup if vars are missing)
