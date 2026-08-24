@@ -102,7 +102,11 @@ cd backend && npm run migrate
 
 ### Backend
 
-All routes are mounted under `/api/v1` in `src/routes/index.ts` (`auth`, `organisations`, `users`, `customers`, `quotations`, `invoices`, `payments`). Each business domain lives in `src/modules/<domain>/` with three files: `routes.ts`, `controller.ts`, and `service.ts`. The `auth` module is the exception — it has only `routes.ts` + `controller.ts` (it proxies Supabase Auth and holds no service logic).
+All routes are mounted under `/api/v1` in `src/routes/index.ts` (`auth`, `organisations`, `users`,
+`customers`, `quotations`, `invoices`, `payments`, `documents`, `verified-payments`, `admin`). Each
+business domain lives in `src/modules/<domain>/` with three files: `routes.ts`, `controller.ts`, and
+`service.ts`. **`admin` extends that by one level** — `src/modules/admin/<domain>/{routes,controller,service}.ts`
+— so the whole cross-tenant surface sits in one directory that is easy to audit. The `auth` module is the exception — it has only `routes.ts` + `controller.ts` (it proxies Supabase Auth and holds no service logic).
 
 **Request lifecycle:**
 1. `src/app.ts` — helmet, cors, rate-limiter, then `/api/v1` router
@@ -126,9 +130,15 @@ All routes are mounted under `/api/v1` in `src/routes/index.ts` (`auth`, `organi
 **Key wiring:**
 - `src/store/authStore.ts` — exports the Supabase client (`supabase`) and Zustand auth store; the client is imported by `src/api/client.ts` to attach the JWT
 - `src/store/tenantStore.ts` / `src/store/themeStore.ts` — the other two Zustand stores (current org, light/dark theme)
-- `src/api/client.ts` — axios instance with a request interceptor that reads the active Supabase session and injects `Authorization: Bearer <token>`. Per-domain callers (`src/api/customers.ts`, `invoices.ts`, `quotations.ts`, `payments.ts`, `auth.ts`) wrap this client — add new API calls there, not inline in components.
-- `src/hooks/` — `useAuth` subscribes to `supabase.auth.onAuthStateChange` and syncs the store; `useAuthInit` / `useThemeInit` bootstrap state on mount; `useTenant` reads the active org
-- `src/components/layout/AppShell.tsx` — shell wrapper with Sidebar + Header + `<Outlet />`; reusable primitives live in `src/components/ui/` (Button, Card, Input, Modal, Badge, ThemeToggle)
+- `src/api/client.ts` — axios instance with a request interceptor that reads the active Supabase session and injects `Authorization: Bearer <token>`. Per-domain callers (`src/api/customers.ts`, `invoices.ts`, `quotations.ts`, `payments.ts`, `auth.ts`, `documents.ts`, `organisations.ts`, `users.ts`, `verifiedPayments.ts`) wrap this client — add new API calls there, not inline in components.
+- `src/hooks/` — `useAuth` subscribes to `supabase.auth.onAuthStateChange` and syncs the store; `useAuthInit` / `useThemeInit` bootstrap state on mount; `useTenant` reads the active org; `useDocumentUpload` owns the upload queue (see **File uploads** below)
+- `src/components/layout/AppShell.tsx` — shell wrapper with Sidebar + Header + `<Outlet />`
+- `src/components/ui/` — `SkeletonShimmer`, `StatusPill`, `ThemeToggle`, `Avatar`, `icons` are in use.
+  `Button`, `Card`, `Input`, `Modal`, `Badge` are **not** — see the warning under *Design system*
+- `src/components/upload/` — `DocumentUploader`, `ImageUploader`, `FileDropZone`, `UploadQueue`
+- `src/components/{ConfigError,ErrorBoundary}.tsx` — startup guards. A missing Supabase env var used
+  to throw during module evaluation, before React mounted, blanking the page with no overlay; `src/lib/env.ts`
+  now collects the problem and `App` renders `ConfigError` instead
 - New users flow through onboarding (`src/pages/onboarding/CompleteProfile.tsx` → `CompanySetup.tsx`) before reaching the dashboard
 
 **Path alias:** `@/` maps to `src/` (configured in both `vite.config.ts` and `tsconfig.app.json`).
@@ -142,7 +152,7 @@ sub-route added later cannot ship unguarded.
 
 Two rules that are load-bearing:
 
-- **Admin services deliberately do not filter by `orgId`.** That is the point of the routes, and it
+- **Admin services deliberately do not filter by `organisationId`.** That is the point of the routes, and it
   is why they live only under `backend/src/modules/admin/`. A missing `organisationId` filter is
   intentional there and a bug everywhere else — never import across that boundary.
 - **`SystemAdminRoute` must not reuse the tenant app's `ProfileGuard`.** That guard sends any profile
@@ -162,12 +172,16 @@ Organisation → UserProfile (many)   // UserProfile.supabaseId links to Supabas
 Organisation → Customer (many)
 Organisation → Quotation (many) → QuotationItem (many)
                                  ↘ Invoice (many) → InvoiceItem (many)
-                                                  ↘ Payment (many)
+                                                  ↘ Payment (many) → Document (many, proof of payment)
+Organisation → Document (many)      // compliance/KYC docs, logos; UserProfile for avatars
+Document | Payment → VerificationEvent (many)   // append-only audit trail
 ```
 
-Enums: `OrgRole`, `SystemRole`, `QuotationStatus`, `InvoiceStatus`, `PaymentMethod`.
+Enums: `OrgRole`, `SystemRole`, `QuotationStatus`, `InvoiceStatus`, `PaymentMethod`,
+`VerificationStatus`, `DocumentKind`, `DocumentUploadStatus`, `DocumentReviewStatus`,
+`VerificationEventType`.
 
-All tenant-scoped entities carry `orgId` — always filter by it to enforce tenant isolation. The DB user identity is `UserProfile` (keyed to Supabase Auth via `supabaseId`), not a bare `User`.
+All tenant-scoped entities carry `organisationId` (not `orgId` — no such column exists) — always filter by it to enforce tenant isolation. The one deliberate exception is `src/modules/admin/`, which is cross-tenant by design. The DB user identity is `UserProfile` (keyed to Supabase Auth via `supabaseId`), not a bare `User`.
 
 ---
 
