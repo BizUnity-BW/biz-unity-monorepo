@@ -2,11 +2,12 @@ import { create } from 'zustand';
 import { createClient } from '@supabase/supabase-js';
 import type { Session, User } from '@supabase/supabase-js';
 import type { UserProfile, Organisation } from '../types';
+import { supabaseUrl, supabaseAnonKey } from '../lib/env';
 
-export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
-);
+// Values come from lib/env so a missing one cannot throw here. This module is
+// evaluated before React mounts, so a throw took the whole page down with no
+// visible error; App renders ConfigError instead.
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface AuthState {
   // Supabase session

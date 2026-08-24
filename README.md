@@ -50,13 +50,22 @@ docs/        Design principles, MVP spec (+ local compound-engineering notes: pl
 
 ## Quick start
 
-Clone, then set up each workspace. **Both apps read their env files only at startup** — see
-[Environment variables](#environment-variables) first.
+Clone, then create the env files. **Both apps read their env files only at startup**, and both
+fail immediately without them — the backend exits on boot, the frontend shows a configuration
+screen naming the missing variables.
+
+### 0. Env files (from the repo root)
+
+```bash
+./scripts/dev-setup.sh      # copies both .env.example files; never overwrites an existing one
+```
+
+It prints any values still holding their `your-…` placeholder. Fill those in before starting either
+app — see [Environment variables](#environment-variables) for what each one is.
 
 ### 1. Backend (`cd backend`)
 
 ```bash
-cp .env.example .env        # then fill in the values (see table below)
 npm install
 npm run generate            # prisma generate (creates the typed client)
 npm run migrate             # prisma migrate dev (applies the schema to your DB)
@@ -66,7 +75,6 @@ npm run dev                 # nodemon + ts-node on http://localhost:4000
 ### 2. Frontend (`cd frontend`)
 
 ```bash
-cp .env.example .env.local  # then fill in the values (see table below)
 npm install
 npm run dev                 # Vite dev server on http://localhost:5173
 ```

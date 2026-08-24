@@ -33,6 +33,13 @@ const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
   console.error('Invalid environment variables:', parsed.error.flatten().fieldErrors);
+  // A fresh clone has no backend/.env at all, so this is the first thing it hits.
+  // Without the hint the exit reads as a code fault rather than missing setup.
+  console.error(
+    '\nIf this is a fresh clone, create the env files first:\n' +
+      '  ./scripts/dev-setup.sh   (from the repo root)\n' +
+      'then fill in the values listed above. See README → Environment variables.\n',
+  );
   process.exit(1);
 }
 

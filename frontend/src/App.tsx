@@ -25,6 +25,8 @@ import SettingsLayout from './pages/settings/SettingsLayout';
 import OrganisationSettings from './pages/settings/OrganisationSettings';
 import ComplianceDocuments from './pages/settings/ComplianceDocuments';
 import ProfileSettings from './pages/settings/ProfileSettings';
+import ConfigError from './components/ConfigError';
+import { isConfigured, missingEnvVars } from './lib/env';
 
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
@@ -87,6 +89,10 @@ function PasswordRecoveryListener() {
 export default function App() {
   useAuthInit();
   useThemeInit();
+
+  // Before anything tries to reach Supabase with placeholder credentials, say what
+  // is missing. Hooks run first so their order stays unconditional.
+  if (!isConfigured) return <ConfigError missing={missingEnvVars} />;
 
   return (
     <BrowserRouter>
