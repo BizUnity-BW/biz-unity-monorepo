@@ -47,63 +47,120 @@ enum PaymentMethod {
   OTHER
 }
 
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum DocumentKind {
+  PROOF_OF_PAYMENT
+  COMPANY_REGISTRATION
+  TAX_CLEARANCE
+  TRADE_LICENCE
+  VAT_CERTIFICATE
+  BANK_CONFIRMATION
+  DIRECTOR_ID
+  PROOF_OF_ADDRESS
+  ORGANISATION_LOGO
+  USER_AVATAR
+  OTHER
+}
+
+/// PENDING_UPLOAD rows exist only between minting a signed upload URL and
+/// confirming the bytes landed. They are never returned to a client.
+enum DocumentUploadStatus {
+  PENDING_UPLOAD
+  READY
+}
+
+/// NOT_REQUIRED covers documents that carry no verdict of their own: proof of
+/// payment (the Payment holds the verdict), logos and avatars.
+enum DocumentReviewStatus {
+  NOT_REQUIRED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum VerificationEventType {
+  PAYMENT_RECORDED
+  POP_ADDED
+  POP_REMOVED
+  PAYMENT_VERIFIED
+  PAYMENT_REJECTED
+  DOCUMENT_UPLOADED
+  DOCUMENT_REMOVED
+  DOCUMENT_VERIFIED
+  DOCUMENT_REJECTED
+}
+
 // ── Models ─────────────────────────────────────────────────────────────────
 
 model Organisation {
-  id         String    @id @default(cuid())
-  name       String
-  slug       String    @unique
-  email      String?
-  phone      String?
-  address    String?
-  logoUrl    String?
-  vatNumber  String?
-  currency   String    @default("ZAR")
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  deletedAt  DateTime?
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  email     String?
+  phone     String?
+  address   String?
+  logoUrl   String?
+  vatNumber String?
+  currency  String    @default("ZAR")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   userProfiles UserProfile[]
   customers    Customer[]
   quotations   Quotation[]
   invoices     Invoice[]
+  payments     Payment[]
+  documents    Document[]
 
   @@map("organisations")
 }
 
 model UserProfile {
-  id             String     @id @default(cuid())
-  supabaseId     String     @unique
-  email          String     @unique
-  firstName      String?
-  lastName       String?
-  phone          String?
-  avatarUrl      String?
-  systemRole     SystemRole @default(SYSTEM_USER)
-  orgRole        OrgRole    @default(SALES)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id         String     @id @default(cuid())
+  supabaseId String     @unique
+  email      String     @unique
+  firstName  String?
+  lastName   String?
+  phone      String?
+  avatarUrl  String?
+  systemRole SystemRole @default(SYSTEM_USER)
+  orgRole    OrgRole    @default(SALES)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   organisationId String?
   organisation   Organisation? @relation(fields: [organisationId], references: [id])
 
-  payments Payment[] @relation("RecordedBy")
+  payments         Payment[] @relation("RecordedBy")
+  paymentsVerified Payment[] @relation("PaymentVerifiedBy")
+
+  documents         Document[] @relation("DocumentSubject")
+  documentsUploaded Document[] @relation("DocumentUploadedBy")
+  documentsReviewed Document[] @relation("DocumentReviewedBy")
+
+  verificationEvents VerificationEvent[] @relation("EventActor")
 
   @@map("user_profiles")
 }
 
 model Customer {
-  id             String    @id @default(cuid())
-  firstName      String
-  lastName       String
-  email          String?
-  phone          String?
-  company        String?
-  address        String?
-  notes          String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
+  id        String    @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  company   String?
+  address   String?
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
@@ -116,18 +173,18 @@ model Customer {
 }
 
 model Quotation {
-  id             String          @id @default(cuid())
-  number         String
-  status         QuotationStatus @default(DRAFT)
-  issueDate      DateTime        @default(now())
-  expiryDate     DateTime?
-  notes          String?
-  subtotalCents  Int             @default(0)
-  taxCents       Int             @default(0)
-  totalCents     Int             @default(0)
-  convertedAt    DateTime?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id            String          @id @default(cuid())
+  number        String
+  status        QuotationStatus @default(DRAFT)
+  issueDate     DateTime        @default(now())
+  expiryDate    DateTime?
+  notes         String?
+  subtotalCents Int             @default(0)
+  taxCents      Int             @default(0)
+  totalCents    Int             @default(0)
+  convertedAt   DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
@@ -144,7 +201,7 @@ model Quotation {
 }
 
 model QuotationItem {
-  id             String @id @default(cuid())
+  id             String  @id @default(cuid())
   description    String
   quantity       Decimal
   unitPriceCents Int
@@ -179,7 +236,7 @@ model Invoice {
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id])
 
-  quotationId String?   @unique
+  quotationId String?    @unique
   quotation   Quotation? @relation(fields: [quotationId], references: [id])
 
   items    InvoiceItem[]
@@ -214,12 +271,111 @@ model Payment {
   paidAt      DateTime
   createdAt   DateTime      @default(now())
 
+  /// Whether a platform admin has independently verified this payment against an
+  /// attached proof of payment. Deliberately separate from the invoice's own
+  /// PAID/PARTIALLY_PAID status, which counts recorded payments regardless.
+  verificationStatus VerificationStatus @default(PENDING)
+  verifiedAt         DateTime?
+  rejectionReason    String?
+
+  /// Denormalised from the invoice so the cross-org verification queue and the
+  /// funder statement can filter and index without joining. Payments are never
+  /// reparented, so this cannot drift.
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+
   invoiceId String
   invoice   Invoice @relation(fields: [invoiceId], references: [id])
 
   recordedById String?
   recordedBy   UserProfile? @relation("RecordedBy", fields: [recordedById], references: [id])
 
+  verifiedById String?
+  verifiedBy   UserProfile? @relation("PaymentVerifiedBy", fields: [verifiedById], references: [id])
+
+  documents          Document[]
+  verificationEvents VerificationEvent[]
+
   @@index([invoiceId])
+  @@index([organisationId, verificationStatus])
+  @@index([verificationStatus])
   @@map("payments")
+}
+
+model Document {
+  id           String               @id @default(cuid())
+  kind         DocumentKind
+  bucket       String
+  storagePath  String               @unique
+  /// The name the user uploaded, kept verbatim for display. The storage path
+  /// carries a sanitised form of it.
+  fileName     String
+  mimeType     String
+  sizeBytes    Int
+  uploadStatus DocumentUploadStatus @default(PENDING_UPLOAD)
+  reviewStatus DocumentReviewStatus @default(NOT_REQUIRED)
+
+  rejectionReason String?
+  reviewedAt      DateTime?
+
+  /// Compliance metadata, only meaningful for licences and certificates.
+  documentNumber String?
+  issuedAt       DateTime?
+  expiresAt      DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+
+  /// Set for proof-of-payment documents. Null for org-level compliance documents.
+  paymentId String?
+  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  /// Set for avatars — the profile the image belongs to, not the uploader.
+  userProfileId String?
+  userProfile   UserProfile? @relation("DocumentSubject", fields: [userProfileId], references: [id])
+
+  uploadedById String?
+  uploadedBy   UserProfile? @relation("DocumentUploadedBy", fields: [uploadedById], references: [id])
+
+  reviewedById String?
+  reviewedBy   UserProfile? @relation("DocumentReviewedBy", fields: [reviewedById], references: [id])
+
+  verificationEvents VerificationEvent[]
+
+  @@index([organisationId, kind])
+  @@index([paymentId])
+  @@index([reviewStatus])
+  @@map("documents")
+}
+
+/// Append-only audit trail. This is what makes a verified payment defensible to a
+/// funder, so nothing in the application may ever update or delete a row here —
+/// hence no `updatedAt` and no `deletedAt`.
+model VerificationEvent {
+  id    String                @id @default(cuid())
+  event VerificationEventType
+  note  String?
+
+  /// The actor's role at the time of the event, snapshotted as text so a later
+  /// role change cannot rewrite history.
+  actorRole String
+
+  createdAt DateTime @default(now())
+
+  actorUserId String?
+  actor       UserProfile? @relation("EventActor", fields: [actorUserId], references: [id])
+
+  paymentId String?
+  payment   Payment? @relation(fields: [paymentId], references: [id])
+
+  documentId String?
+  document   Document? @relation(fields: [documentId], references: [id])
+
+  @@index([paymentId])
+  @@index([documentId])
+  @@map("verification_events")
 }

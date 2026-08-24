@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { invoicesApi } from '../../api/invoices';
-import { paymentsApi } from '../../api/payments';
 import { useAuth } from '../../hooks/useAuth';
 import { formatMoney, formatDate, errMessage } from '../../lib/format';
+import { paymentMethodLabel } from '../../lib/paymentMethods';
 import StatusPill from '../../components/ui/StatusPill';
 import SkeletonShimmer from '../../components/ui/SkeletonShimmer';
+import { IconPaperclip } from '../../components/ui/icons';
 import { PLACEHOLDER_INVOICE } from '../../lib/skeletonPlaceholders';
-import type { Invoice, InvoiceStatus, PaymentMethod } from '../../types';
+import RecordPaymentModal from './RecordPaymentModal';
+import AttachProofModal from './AttachProofModal';
+import type { Invoice, InvoiceStatus, Payment } from '../../types';
 
 const STATUSES: InvoiceStatus[] = [
   'DRAFT',
@@ -17,18 +20,6 @@ const STATUSES: InvoiceStatus[] = [
   'OVERDUE',
   'CANCELLED',
 ];
-
-const METHODS: { value: PaymentMethod; label: string }[] = [
-  { value: 'CASH', label: 'Cash' },
-  { value: 'BANK_TRANSFER', label: 'Bank transfer' },
-  { value: 'CARD', label: 'Card' },
-  { value: 'MOBILE_MONEY', label: 'Mobile money' },
-  { value: 'OTHER', label: 'Other' },
-];
-
-const inputClass =
-  'w-full bg-[var(--color-input-bg)] border border-[var(--color-input-border)] rounded-xl px-3 py-2 text-sm text-[var(--color-text)] placeholder-[var(--color-text-faint)] focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 transition-colors';
-const labelClass = 'text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide';
 
 function customerName(i: Invoice): string {
   return i.customer ? `${i.customer.firstName} ${i.customer.lastName}`.trim() : '—';
@@ -43,6 +34,7 @@ export default function InvoiceDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [payOpen, setPayOpen] = useState(false);
+  const [attachFor, setAttachFor] = useState<Payment | null>(null);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -202,19 +194,43 @@ export default function InvoiceDetail() {
             ) : (
               <ul className="divide-y divide-[var(--color-border-subtle)]">
                 {(model.payments ?? []).map((p) => (
-                  <li key={p.id} className="flex items-center justify-between gap-3 px-5 py-3">
-                    <div>
-                      <p className="text-sm text-[var(--color-text)]">
+                  <li key={p.id} className="flex items-start justify-between gap-3 px-5 py-3">
+                    <div className="min-w-0">
+                      <p className="flex flex-wrap items-center gap-2 text-sm text-[var(--color-text)]">
                         {formatMoney(p.amountCents, currency)}
-                        <span className="ml-2 text-xs text-[var(--color-text-muted)]">
-                          {METHODS.find((m) => m.value === p.method)?.label ?? p.method}
+                        <span className="text-xs text-[var(--color-text-muted)]">
+                          {paymentMethodLabel(p.method)}
                         </span>
+                        <StatusPill status={p.verificationStatus} />
+                        {(p.documents ?? []).length > 0 && (
+                          <span className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
+                            <IconPaperclip />
+                            {(p.documents ?? []).length}
+                          </span>
+                        )}
                       </p>
                       <p className="text-xs text-[var(--color-text-faint)]">
                         {formatDate(p.paidAt)}
                         {p.reference ? ` · ${p.reference}` : ''}
+                        {p.verifiedAt ? ` · Verified ${formatDate(p.verifiedAt)}` : ''}
                       </p>
+                      {p.verificationStatus === 'REJECTED' && p.rejectionReason && (
+                        <p className="mt-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-xs text-red-400">
+                          Rejected: {p.rejectionReason} Upload a clearer document to resubmit.
+                        </p>
+                      )}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setAttachFor(p)}
+                      className="shrink-0 rounded-lg border border-[var(--color-border)] px-2.5 py-1 text-xs text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-hover)]"
+                    >
+                      {p.verificationStatus === 'REJECTED'
+                        ? 'Resubmit'
+                        : (p.documents ?? []).length > 0
+                          ? 'Proof'
+                          : 'Attach proof'}
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -223,7 +239,8 @@ export default function InvoiceDetail() {
         </SkeletonShimmer>
       ) : null}
 
-      {/* Fixed-position overlay, so it stays outside the shimmer's measured subtree. */}
+      {/* Fixed-position overlays, so they stay outside the shimmer's measured subtree.
+          Both are gated on the real `invoice`, never on `model`. */}
       {payOpen && invoice && (
         <RecordPaymentModal
           invoice={invoice}
@@ -232,6 +249,18 @@ export default function InvoiceDetail() {
           onClose={() => setPayOpen(false)}
           onSaved={() => {
             setPayOpen(false);
+            void load();
+          }}
+        />
+      )}
+
+      {attachFor && invoice && (
+        <AttachProofModal
+          payment={attachFor}
+          currency={currency}
+          onClose={() => setAttachFor(null)}
+          onSaved={() => {
+            setAttachFor(null);
             void load();
           }}
         />
@@ -247,144 +276,6 @@ function Row({ label, value, muted }: { label: string; value: string; muted?: bo
     >
       <span>{label}</span>
       <span>{value}</span>
-    </div>
-  );
-}
-
-function RecordPaymentModal({
-  invoice,
-  currency,
-  defaultAmountCents,
-  onClose,
-  onSaved,
-}: {
-  invoice: Invoice;
-  currency: string;
-  defaultAmountCents: number;
-  onClose: () => void;
-  onSaved: () => void;
-}) {
-  const [amount, setAmount] = useState((defaultAmountCents / 100).toFixed(2));
-  const [method, setMethod] = useState<PaymentMethod>('BANK_TRANSFER');
-  const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10));
-  const [reference, setReference] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    const amountCents = Math.round(parseFloat(amount) * 100);
-    if (!Number.isFinite(amountCents) || amountCents <= 0) {
-      setError('Enter a valid amount.');
-      return;
-    }
-    setSaving(true);
-    try {
-      await paymentsApi.create({
-        invoiceId: invoice.id,
-        amountCents,
-        method,
-        reference: reference.trim() || undefined,
-        paidAt: new Date(paidAt).toISOString(),
-      });
-      onSaved();
-    } catch (err) {
-      setError(errMessage(err, 'Failed to record payment.'));
-      setSaving(false);
-    }
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <form
-        onSubmit={submit}
-        className="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-lg font-bold text-[var(--color-text)]">Record payment</h2>
-        <p className="mt-1 mb-5 text-sm text-[var(--color-text-muted)]">
-          Balance due {formatMoney(defaultAmountCents, currency)} on {invoice.number}.
-        </p>
-
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className={labelClass}>Amount ({currency})</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              className={inputClass}
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Method</label>
-              <select
-                className={`${inputClass} cursor-pointer`}
-                value={method}
-                onChange={(e) => setMethod(e.target.value as PaymentMethod)}
-              >
-                {METHODS.map((m) => (
-                  <option key={m.value} value={m.value} className="bg-[var(--color-surface)]">
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Date</label>
-              <input
-                type="date"
-                className={inputClass}
-                value={paidAt}
-                onChange={(e) => setPaidAt(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className={labelClass}>
-              Reference{' '}
-              <span className="font-normal normal-case text-[var(--color-text-faint)]">(opt.)</span>
-            </label>
-            <input
-              className={inputClass}
-              placeholder="e.g. EFT ref, receipt no."
-              value={reference}
-              onChange={(e) => setReference(e.target.value)}
-            />
-          </div>
-
-          {error && (
-            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-              {error}
-            </div>
-          )}
-
-          <div className="mt-1 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={saving}
-              className="rounded-xl border border-[var(--color-border)] px-4 py-2.5 text-sm text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-hover)] disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-black transition-colors hover:bg-amber-400 disabled:bg-amber-500/40"
-            >
-              {saving ? 'Saving…' : 'Record payment'}
-            </button>
-          </div>
-        </div>
-      </form>
     </div>
   );
 }

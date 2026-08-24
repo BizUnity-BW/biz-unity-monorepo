@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ── Smooth theme transitions ─────────────────────────────────────────────── */
 /* Applied to structural elements so bg/text colours ease when theme changes.  */
@@ -17,7 +17,12 @@ select,
 button,
 label,
 p,
-h1, h2, h3, h4, h5, h6,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
 span,
 a {
   transition-property: background-color, border-color, color;
@@ -27,7 +32,7 @@ a {
 
 /* ── Design tokens   dark (default) ──────────────────────────────────────── */
 :root,
-[data-theme="dark"] {
+[data-theme='dark'] {
   color-scheme: dark;
   --color-bg: #0a0a0a;
   --color-surface: #111111;
@@ -50,7 +55,7 @@ a {
 }
 
 /* ── Design tokens   light ────────────────────────────────────────────────── */
-[data-theme="light"] {
+[data-theme='light'] {
   color-scheme: light;
   --color-bg: #f5f4f0;
   --color-surface: #ffffff;
@@ -70,4 +75,65 @@ a {
   /* Skeleton loading: resting block, then the gold sweep that passes over it. */
   --color-shimmer-base: rgba(26, 24, 20, 0.07);
   --color-shimmer-sweep: rgba(201, 162, 77, 0.2);
+}
+
+/* ── Print ────────────────────────────────────────────────────────────────── */
+/* The app is dark-first, so printing without re-pointing the tokens gives white
+   text on white paper — a blank page. Redefining them inside the print query fixes
+   every printable page at once, whichever theme is active. */
+@media print {
+  :root,
+  [data-theme='dark'],
+  [data-theme='light'] {
+    color-scheme: light;
+    --color-bg: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-hover: #ffffff;
+    --color-header: #ffffff;
+    --color-border: rgba(0, 0, 0, 0.28);
+    --color-border-subtle: rgba(0, 0, 0, 0.14);
+    --color-border-strong: rgba(0, 0, 0, 0.4);
+    --color-text: #000000;
+    --color-text-secondary: #2b2b2b;
+    --color-text-muted: #4a4a4a;
+    --color-text-faint: #6b6b6b;
+    --color-text-faintest: #8a8a8a;
+  }
+
+  /* AppShell is h-screen with an overflow-auto main, which otherwise clips the
+     printout to a single page. These hooks let it unroll. */
+  [data-print-expand] {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+  }
+
+  * {
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Repeat table headers across pages and avoid splitting a row. */
+  thead {
+    display: table-header-group;
+  }
+
+  tr,
+  li {
+    break-inside: avoid;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
 }

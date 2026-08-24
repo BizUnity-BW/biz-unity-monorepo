@@ -20,6 +20,11 @@ import QuotationForm from './pages/quotations/QuotationForm';
 import InvoiceList from './pages/invoices/InvoiceList';
 import InvoiceDetail from './pages/invoices/InvoiceDetail';
 import PaymentHistory from './pages/payments/PaymentHistory';
+import VerifiedPaymentsStatement from './pages/payments/VerifiedPaymentsStatement';
+import SettingsLayout from './pages/settings/SettingsLayout';
+import OrganisationSettings from './pages/settings/OrganisationSettings';
+import ComplianceDocuments from './pages/settings/ComplianceDocuments';
+import ProfileSettings from './pages/settings/ProfileSettings';
 import ConfigError from './components/ConfigError';
 import { isConfigured, missingEnvVars } from './lib/env';
 
@@ -158,6 +163,13 @@ export default function App() {
           <Route path="/invoices" element={<InvoiceList />} />
           <Route path="/invoices/:id" element={<InvoiceDetail />} />
           <Route path="/payments" element={<PaymentHistory />} />
+          <Route path="/payments/statement" element={<VerifiedPaymentsStatement />} />
+          <Route path="/settings" element={<Navigate to="/settings/organisation" replace />} />
+          <Route element={<SettingsLayout />}>
+            <Route path="/settings/organisation" element={<OrganisationSettings />} />
+            <Route path="/settings/documents" element={<ComplianceDocuments />} />
+            <Route path="/settings/profile" element={<ProfileSettings />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

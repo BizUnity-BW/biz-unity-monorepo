@@ -1,5 +1,6 @@
 import { prisma } from '../../config/prisma';
 import { Prisma, InvoiceStatus, QuotationStatus } from '@prisma/client';
+import { liveDocumentFilter } from '../documents/service';
 
 export type LineItem = {
   description: string;
@@ -29,7 +30,16 @@ export function listInvoices(organisationId: string) {
 export function getInvoice(id: string, organisationId: string) {
   return prisma.invoice.findFirst({
     where: { id, organisationId, deletedAt: null },
-    include: { customer: true, items: true, payments: true },
+    include: {
+      customer: true,
+      items: true,
+      // Documents come along so the detail page can show each payment's proof count
+      // and verification badge without a request per payment.
+      payments: {
+        orderBy: { paidAt: 'desc' },
+        include: { documents: { where: liveDocumentFilter, orderBy: { createdAt: 'asc' } } },
+      },
+    },
   });
 }
 
