@@ -79,7 +79,18 @@ npm install
 npm run dev                 # Vite dev server on http://localhost:5173
 ```
 
-### 3. Database — pick one
+### 3. Admin console (`cd admin`) — optional
+
+```bash
+npm install
+npm run dev                 # Vite dev server on http://localhost:5174
+```
+
+The platform back-office for BizUnity staff, cross-tenant. Only reachable by a `UserProfile` with
+`systemRole = SYSTEM_ADMIN`; grant it with `cd backend && npm run admin:grant -- <email>`. There is
+no self-signup. Skip this unless you are working on it.
+
+### 4. Database — pick one
 
 - **Local Postgres (Docker)** — the default in `backend/.env.example`. From the repo root:
   ```bash
@@ -91,6 +102,11 @@ npm run dev                 # Vite dev server on http://localhost:5173
   `DIRECT_URL`). The schema is already migrated there.
 
 Open **http://localhost:5173**, register an account, and complete onboarding (profile → company).
+
+Storage buckets are created separately, once per environment:
+```bash
+cd backend && npm run storage:provision   # idempotent
+```
 
 ---
 
@@ -109,7 +125,11 @@ Copy the `.env.example` in each workspace and fill in real values. **Never commi
 | `SUPABASE_URL` | ✅ | Your Supabase project URL, e.g. `https://<ref>.supabase.co`. |
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | **Secret** service-role key (bypasses RLS; backend-only). From API settings. |
 | `FLAGSMITH_ENVIRONMENT_KEY` | ➖ | Flagsmith server key (optional; feature flags). |
+| `SUPABASE_BUCKET_DOCUMENTS` | ➖ | Private bucket for documents (default `bizunity-documents`). Signed URLs only. |
+| `SUPABASE_BUCKET_PUBLIC` | ➖ | Public bucket for logos/avatars (default `bizunity-public`). |
+| `SIGNED_URL_TTL_SECONDS` | ➖ | Lifetime of a document download URL (default `300`). Minted per click. |
 | `FRONTEND_URL` | ➖ | Allowed frontend origin for CORS, e.g. `http://localhost:5173`. |
+| `ADMIN_URL` | ➖ | Allowed admin-console origin for CORS, e.g. `http://localhost:5174`. |
 | `PORT` | ➖ | API port (default `4000`). |
 | `NODE_ENV` | ➖ | `development` \| `production` \| `test` (default `development`). |
 | `RATE_LIMIT_ENABLED` | ➖ | `true`/`false`. Set **`false`** locally to avoid 429s during heavy testing. |
@@ -126,8 +146,18 @@ Copy the `.env.example` in each workspace and fill in real values. **Never commi
 | `VITE_API_URL` | ✅ | Base URL of the backend API, e.g. `http://localhost:4000`. |
 | `VITE_FLAGSMITH_ENVIRONMENT_KEY` | ➖ | Flagsmith client environment key (optional). |
 
-> If `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` are missing, the Supabase client throws on load and
-> the app renders a blank screen — fill them in and restart Vite.
+> If `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` are missing — or still hold their `your-…`
+> placeholder — the app renders a configuration screen naming the offending variables instead of
+> starting. Fill them in and **restart Vite**: env is read only at startup, so the page will not
+> hot-reload the change.
+
+### Admin console — `admin/.env.local`
+
+| Variable | Required | Description |
+|---|---|---|
+| `VITE_SUPABASE_URL` | ✅ | Same Supabase project as the other two apps. |
+| `VITE_SUPABASE_ANON_KEY` | ✅ | Public **anon** key. Never the service-role key — this is a browser bundle. |
+| `VITE_API_URL` | ✅ | Base URL of the backend API, e.g. `http://localhost:4000`. |
 
 ---
 
