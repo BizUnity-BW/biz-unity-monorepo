@@ -49,6 +49,8 @@ export default function QuotationForm() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Set when an edit target turns out not to be DRAFT — the backend would 409 on save.
+  const [locked, setLocked] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -61,6 +63,15 @@ export default function QuotationForm() {
       setCustomers(custRes.data.data);
       if (quo) {
         const q = quo.data.data;
+        // `/quotations/:id/edit` is deep-linkable, so the list's disabled Edit button is
+        // not the only way in. Lock the form up front rather than letting someone retype
+        // an accepted quotation and only discover on save that the backend rejects it.
+        if (q.status !== 'DRAFT') {
+          setLocked(true);
+          setError(
+            'Only draft quotations can be edited. This one is ' + q.status.toLowerCase() + '.',
+          );
+        }
         setCustomerId(q.customerId);
         setExpiryDate(q.expiryDate ? q.expiryDate.slice(0, 10) : '');
         setNotes(q.notes ?? '');
@@ -107,6 +118,11 @@ export default function QuotationForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // A disabled submit button doesn't stop Enter in a text field from submitting the
+    // form, so re-check here and keep the existing message rather than clearing it.
+    if (locked) return;
+
     setError(null);
 
     if (!customerId) {
@@ -369,8 +385,8 @@ export default function QuotationForm() {
             </Link>
             <button
               type="submit"
-              disabled={saving}
-              className="rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-black transition-colors hover:bg-amber-400 disabled:bg-amber-500/40"
+              disabled={saving || locked}
+              className="rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-black transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-amber-500/40"
             >
               {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create quotation'}
             </button>

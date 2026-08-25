@@ -41,16 +41,22 @@ export async function update(req: Request, res: Response): Promise<void> {
     fail(res, 'Validation failed', 422, parsed.error.flatten());
     return;
   }
-  const updated = await service.updateQuotation(
+  const result = await service.updateQuotation(
     req.params.id as string,
     (req as AuthenticatedRequest).org.id,
     parsed.data,
   );
-  if (!updated) {
-    fail(res, 'Not found', 404);
+
+  if ('error' in result) {
+    if (result.error === 'NOT_FOUND') {
+      fail(res, 'Not found', 404);
+    } else {
+      fail(res, 'Only DRAFT quotations can be edited', 409);
+    }
     return;
   }
-  ok(res, updated);
+
+  ok(res, result);
 }
 
 export async function updateStatus(req: Request, res: Response): Promise<void> {
