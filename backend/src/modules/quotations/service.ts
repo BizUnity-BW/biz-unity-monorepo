@@ -76,7 +76,14 @@ export async function updateQuotation(
 ) {
   // Tenant guard: only touch a quotation that belongs to this org.
   const existing = await prisma.quotation.findFirst({ where: { id, organisationId } });
-  if (!existing) return null;
+  if (!existing) return { error: 'NOT_FOUND' as const };
+
+  // DRAFT is the only editable status, per the MVP1 spec. Everything past it has been
+  // shown to the customer or acted on: rewriting a CONVERTED quotation's totals would
+  // leave it disagreeing with the invoice generated from it, with no audit trail of the
+  // change. The status transition is the deliberate one-way door — reverting to DRAFT is
+  // a `PATCH /:id/status` call, which is itself restricted and recorded.
+  if (existing.status !== QuotationStatus.DRAFT) return { error: 'NOT_DRAFT' as const };
 
   const totals = calcTotals(data.items);
 
