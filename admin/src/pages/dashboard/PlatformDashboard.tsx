@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { organisationsApi } from '../../api/organisations';
 import { usersApi } from '../../api/users';
 import { formatDate, errMessage } from '../../lib/format';
+import SkeletonShimmer from '../../components/ui/SkeletonShimmer';
+import { PLACEHOLDER_ORGANISATIONS } from '../../lib/skeletonPlaceholders';
 import type { AdminOrganisation } from '../../types';
 
 /**
@@ -46,10 +48,18 @@ export default function PlatformDashboard() {
     };
   }, []);
 
+  // Rendered through stand-ins while loading: SkeletonShimmer measures the real
+  // boxes, so short-circuiting to a spinner would give it nothing to measure.
+  const rows = loading ? PLACEHOLDER_ORGANISATIONS : recent;
+  const orgs = loading ? 12 : orgCount;
+  const users = loading ? 34 : userCount;
+
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="text-xl font-semibold text-[var(--color-text)]">Platform</h1>
-      <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+      <h1 data-shimmer-ignore className="text-xl font-semibold text-[var(--color-text)]">
+        Platform
+      </h1>
+      <p data-shimmer-ignore className="mt-1 text-sm text-[var(--color-text-secondary)]">
         Every figure here spans all organisations.
       </p>
 
@@ -59,81 +69,79 @@ export default function PlatformDashboard() {
         </p>
       )}
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Tile label="Organisations" value={orgCount} loading={loading} to="/organisations" />
-        <Tile label="User profiles" value={userCount} loading={loading} to="/users" />
-      </div>
-
-      <section className="mt-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold tracking-wider text-[var(--color-text-secondary)] uppercase">
-            Newest organisations
-          </h2>
-          <Link to="/organisations" className="text-sm text-amber-500 hover:text-amber-400">
-            View all
-          </Link>
+      <SkeletonShimmer loading={loading}>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <Tile label="Organisations" value={orgs} to="/organisations" />
+          <Tile label="User profiles" value={users} to="/users" />
         </div>
 
-        <div className="mt-3 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-          {loading ? (
-            <p className="p-4 text-sm text-[var(--color-text-secondary)]">Loading…</p>
-          ) : recent.length === 0 ? (
-            <p className="p-4 text-sm text-[var(--color-text-secondary)]">
-              No organisations yet. The first one appears when someone completes company setup.
-            </p>
-          ) : (
-            <ul className="divide-y divide-[var(--color-border-subtle)]">
-              {recent.map((org) => (
-                <li key={org.id}>
-                  <Link
-                    to={`/organisations/${org.id}`}
-                    className="flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-[var(--color-surface-hover)]"
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-[var(--color-text)]">
-                        {org.name}
+        <section className="mt-8">
+          <div className="flex items-center justify-between">
+            <h2
+              data-shimmer-ignore
+              className="text-sm font-semibold tracking-wider text-[var(--color-text-secondary)] uppercase"
+            >
+              Newest organisations
+            </h2>
+            <Link
+              to="/organisations"
+              data-shimmer-ignore
+              className="text-sm text-amber-500 hover:text-amber-400"
+            >
+              View all
+            </Link>
+          </div>
+
+          <div className="mt-3 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+            {!loading && rows.length === 0 ? (
+              <p className="p-4 text-sm text-[var(--color-text-secondary)]">
+                No organisations yet. The first one appears when someone completes company setup.
+              </p>
+            ) : (
+              <ul className="divide-y divide-[var(--color-border-subtle)]">
+                {rows.map((org) => (
+                  <li key={org.id}>
+                    <Link
+                      to={`/organisations/${org.id}`}
+                      className="flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-[var(--color-surface-hover)]"
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium text-[var(--color-text)]">
+                          {org.name}
+                        </span>
+                        <span className="block truncate font-mono text-xs text-[var(--color-text-muted)]">
+                          {org.slug}
+                        </span>
                       </span>
-                      <span className="block truncate font-mono text-xs text-[var(--color-text-muted)]">
-                        {org.slug}
+                      <span className="shrink-0 text-xs text-[var(--color-text-secondary)]">
+                        {org._count.userProfiles} {org._count.userProfiles === 1 ? 'user' : 'users'}{' '}
+                        · {formatDate(org.createdAt)}
                       </span>
-                    </span>
-                    <span className="shrink-0 text-xs text-[var(--color-text-secondary)]">
-                      {org._count.userProfiles} {org._count.userProfiles === 1 ? 'user' : 'users'} ·{' '}
-                      {formatDate(org.createdAt)}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+      </SkeletonShimmer>
     </div>
   );
 }
 
-function Tile({
-  label,
-  value,
-  loading,
-  to,
-}: {
-  label: string;
-  value: number | null;
-  loading: boolean;
-  to: string;
-}) {
+function Tile({ label, value, to }: { label: string; value: number | null; to: string }) {
   return (
     <Link
       to={to}
       className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-colors hover:bg-[var(--color-surface-hover)]"
     >
-      <p className="text-xs font-semibold tracking-wider text-[var(--color-text-secondary)] uppercase">
+      <p
+        data-shimmer-ignore
+        className="text-xs font-semibold tracking-wider text-[var(--color-text-secondary)] uppercase"
+      >
         {label}
       </p>
-      <p className="mt-2 text-3xl font-semibold text-[var(--color-text)]">
-        {loading ? '—' : (value ?? '—')}
-      </p>
+      <p className="mt-2 text-3xl font-semibold text-[var(--color-text)]">{value ?? '—'}</p>
     </Link>
   );
 }
