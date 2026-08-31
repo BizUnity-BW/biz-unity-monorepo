@@ -178,9 +178,19 @@ export default function QuotationList() {
                           </option>
                         ))}
                       </select>
+                      {/*
+                        Only a DRAFT quotation is editable — the backend returns 409 for
+                        anything else. Rendered as a disabled control rather than hidden so
+                        the row's action column doesn't reflow between statuses, and so the
+                        reason is visible on hover instead of the button just vanishing.
+                      */}
                       <button
                         onClick={() => navigate(`/quotations/${q.id}/edit`)}
-                        className="rounded-lg px-2.5 py-1.5 text-xs text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface)] hover:text-amber-400"
+                        disabled={q.status !== 'DRAFT'}
+                        title={
+                          q.status !== 'DRAFT' ? 'Only draft quotations can be edited' : undefined
+                        }
+                        className="rounded-lg px-2.5 py-1.5 text-xs text-[var(--color-text-secondary)] transition-colors enabled:hover:bg-[var(--color-surface)] enabled:hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Edit
                       </button>
