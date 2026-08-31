@@ -20,7 +20,7 @@ function calcTotals(items: LineItem[]) {
 
 export function listQuotations(organisationId: string) {
   return prisma.quotation.findMany({
-    where: { organisationId },
+    where: { organisationId, deletedAt: null },
     orderBy: { createdAt: 'desc' },
     include: { customer: true, items: true },
   });
@@ -28,7 +28,7 @@ export function listQuotations(organisationId: string) {
 
 export function getQuotation(id: string, organisationId: string) {
   return prisma.quotation.findFirst({
-    where: { id, organisationId },
+    where: { id, organisationId, deletedAt: null },
     include: { customer: true, items: true },
   });
 }
@@ -66,7 +66,10 @@ export async function createQuotation(
 }
 
 export function updateQuotationStatus(id: string, organisationId: string, status: QuotationStatus) {
-  return prisma.quotation.updateMany({ where: { id, organisationId }, data: { status } });
+  return prisma.quotation.updateMany({
+    where: { id, organisationId, deletedAt: null },
+    data: { status },
+  });
 }
 
 export async function updateQuotation(
@@ -74,8 +77,10 @@ export async function updateQuotation(
   organisationId: string,
   data: { customerId: string; items: LineItem[]; expiryDate?: string; notes?: string },
 ) {
-  // Tenant guard: only touch a quotation that belongs to this org.
-  const existing = await prisma.quotation.findFirst({ where: { id, organisationId } });
+  // Tenant guard: only touch a live quotation that belongs to this org.
+  const existing = await prisma.quotation.findFirst({
+    where: { id, organisationId, deletedAt: null },
+  });
   if (!existing) return { error: 'NOT_FOUND' as const };
 
   // DRAFT is the only editable status, per the MVP1 spec. Everything past it has been
@@ -111,4 +116,22 @@ export async function updateQuotation(
       include: { items: true, customer: true },
     });
   });
+}
+
+/**
+ * Soft-delete a DRAFT quotation. Never a hard `prisma.quotation.delete` — a CONVERTED
+ * quotation is referenced by its invoice, and hard deletion would orphan it.
+ *
+ * DRAFT-only for the same reason `updateQuotation` is: past DRAFT the customer has seen
+ * it. There is no un-delete endpoint; the row simply stops being returned.
+ */
+export async function deleteQuotation(id: string, organisationId: string) {
+  const existing = await prisma.quotation.findFirst({
+    where: { id, organisationId, deletedAt: null },
+  });
+  if (!existing) return { error: 'NOT_FOUND' as const };
+  if (existing.status !== QuotationStatus.DRAFT) return { error: 'NOT_DRAFT' as const };
+
+  await prisma.quotation.update({ where: { id }, data: { deletedAt: new Date() } });
+  return { ok: true as const };
 }

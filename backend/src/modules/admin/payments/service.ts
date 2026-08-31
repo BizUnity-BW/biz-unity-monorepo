@@ -1,6 +1,7 @@
 import { Prisma, DocumentKind, VerificationStatus, VerificationEventType } from '@prisma/client';
 import { prisma } from '../../../config/prisma';
 import { liveDocumentFilter } from '../../documents/service';
+import { livePaymentFilter } from '../../payments/service';
 
 export type AdminPaymentError = 'NOT_FOUND' | 'NO_PROOF_ATTACHED';
 
@@ -18,6 +19,8 @@ export async function listPayments(filter: {
   limit: number;
 }) {
   const where: Prisma.PaymentWhereInput = {
+    // A reversed payment leaves the queue: there is nothing left to verify.
+    ...livePaymentFilter,
     ...(filter.status ? { verificationStatus: filter.status } : {}),
     ...(filter.organisationId ? { organisationId: filter.organisationId } : {}),
   };
@@ -53,6 +56,12 @@ export async function listPayments(filter: {
   return { total, payments };
 }
 
+/**
+ * Single-payment detail for platform staff. Deliberately *not* filtered by
+ * `livePaymentFilter`: a reversed payment is exactly what an admin investigating a
+ * dispute needs to be able to open, together with its documents and audit trail. It is
+ * excluded from the queue and from `decide`, so it cannot be acted on — only read.
+ */
 export function getPayment(id: string) {
   return prisma.payment.findUnique({
     where: { id },
@@ -84,8 +93,11 @@ export async function decide(
   actorId: string,
   actorRole: string,
 ) {
-  const payment = await prisma.payment.findUnique({
-    where: { id },
+  // findFirst, not findUnique, so `livePaymentFilter` can apply: a reversed payment has
+  // nothing left to verify, and verifying one would stamp VERIFIED on money that was
+  // taken back. Reads as NOT_FOUND, which is what it is as far as the queue is concerned.
+  const payment = await prisma.payment.findFirst({
+    where: { id, ...livePaymentFilter },
     select: { id: true, verificationStatus: true },
   });
   if (!payment) return { error: 'NOT_FOUND' as const };

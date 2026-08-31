@@ -97,7 +97,8 @@ export async function createUploadSlot(
   if (input.kind === DocumentKind.PROOF_OF_PAYMENT) {
     if (!input.paymentId) return err('PAYMENT_REQUIRED');
     const payment = await prisma.payment.findFirst({
-      where: { id: input.paymentId, organisationId },
+      // A reversed payment takes no new evidence — there is nothing left to prove.
+      where: { id: input.paymentId, organisationId, deletedAt: null },
       select: { id: true },
     });
     if (!payment) return err('PAYMENT_NOT_FOUND');
@@ -237,8 +238,10 @@ export async function confirmUpload(id: string, organisationId: string, actorRol
     // This transition has to live here: no tenant-facing endpoint may set a
     // verification status directly.
     if (ready.kind === DocumentKind.PROOF_OF_PAYMENT && ready.paymentId) {
-      const payment = await tx.payment.findUnique({
-        where: { id: ready.paymentId },
+      const payment = await tx.payment.findFirst({
+        // Reversed between slot creation and confirm: leave it alone rather than
+        // putting a payment that no longer counts back into the verification queue.
+        where: { id: ready.paymentId, deletedAt: null },
         select: { verificationStatus: true },
       });
 

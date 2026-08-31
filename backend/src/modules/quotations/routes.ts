@@ -21,5 +21,6 @@ router.patch(
   requireOrgRole(OrgRole.OWNER, OrgRole.MANAGER),
   controller.updateStatus,
 );
+router.delete('/:id', requireOrgRole(OrgRole.OWNER, OrgRole.MANAGER), controller.remove);
 
 export default router;

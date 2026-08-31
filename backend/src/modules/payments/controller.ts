@@ -22,3 +22,15 @@ export async function create(req: Request, res: Response): Promise<void> {
   }
   ok(res, payment, 201);
 }
+
+export async function remove(req: Request, res: Response): Promise<void> {
+  const { org, profile } = req as AuthenticatedRequest;
+  const result = await service.deletePayment(req.params.id as string, org.id, profile.orgRole);
+  if (!result) {
+    // Also the answer for an already-reversed payment: it is no longer a live payment,
+    // and saying so distinguishes it from one that never existed.
+    fail(res, 'Payment not found', 404);
+    return;
+  }
+  ok(res, null);
+}

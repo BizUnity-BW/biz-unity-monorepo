@@ -59,6 +59,24 @@ export async function update(req: Request, res: Response): Promise<void> {
   ok(res, result);
 }
 
+export async function remove(req: Request, res: Response): Promise<void> {
+  const result = await service.deleteQuotation(
+    req.params.id as string,
+    (req as AuthenticatedRequest).org.id,
+  );
+
+  if ('error' in result) {
+    if (result.error === 'NOT_FOUND') {
+      fail(res, 'Not found', 404);
+    } else {
+      fail(res, 'Only DRAFT quotations can be deleted', 409);
+    }
+    return;
+  }
+
+  ok(res, null);
+}
+
 export async function updateStatus(req: Request, res: Response): Promise<void> {
   const parsed = statusSchema.safeParse(req.body);
   if (!parsed.success) {
