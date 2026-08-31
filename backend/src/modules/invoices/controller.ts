@@ -35,6 +35,49 @@ export async function create(req: Request, res: Response): Promise<void> {
   ok(res, await service.createInvoice((req as AuthenticatedRequest).org.id, parsed.data), 201);
 }
 
+export async function update(req: Request, res: Response): Promise<void> {
+  const parsed = invoiceSchema.safeParse(req.body);
+  if (!parsed.success) {
+    fail(res, 'Validation failed', 422, parsed.error.flatten());
+    return;
+  }
+
+  const result = await service.updateInvoice(
+    req.params.id as string,
+    (req as AuthenticatedRequest).org.id,
+    parsed.data,
+  );
+
+  if ('error' in result) {
+    if (result.error === 'NOT_FOUND') {
+      fail(res, 'Not found', 404);
+    } else {
+      fail(res, 'Only DRAFT invoices with no recorded payments can be edited', 409);
+    }
+    return;
+  }
+
+  ok(res, result);
+}
+
+export async function remove(req: Request, res: Response): Promise<void> {
+  const result = await service.deleteInvoice(
+    req.params.id as string,
+    (req as AuthenticatedRequest).org.id,
+  );
+
+  if ('error' in result) {
+    if (result.error === 'NOT_FOUND') {
+      fail(res, 'Not found', 404);
+    } else {
+      fail(res, 'Only DRAFT invoices can be deleted', 409);
+    }
+    return;
+  }
+
+  ok(res, null);
+}
+
 export async function createFromQuotation(req: Request, res: Response): Promise<void> {
   const quotationId = req.params.quotationId as string;
   const dueDate = typeof req.body?.dueDate === 'string' ? req.body.dueDate : undefined;

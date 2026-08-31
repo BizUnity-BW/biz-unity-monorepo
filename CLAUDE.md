@@ -194,6 +194,21 @@ Enums: `OrgRole`, `SystemRole`, `QuotationStatus`, `InvoiceStatus`, `PaymentMeth
 
 All tenant-scoped entities carry `organisationId` (not `orgId` — no such column exists) — always filter by it to enforce tenant isolation. The one deliberate exception is `src/modules/admin/`, which is cross-tenant by design. The DB user identity is `UserProfile` (keyed to Supabase Auth via `supabaseId`), not a bare `User`.
 
+**Soft deletes.** `Organisation`, `Customer`, `Quotation`, `Invoice`, `Document` and `Payment` all
+carry `deletedAt` and are **never** hard-deleted. Read through the model's exported live filter
+(`liveDocumentFilter`, `livePaymentFilter`) rather than writing `deletedAt: null` inline, so there is
+one definition and one name to grep. Two rules that bite:
+
+- **Before adding any hard delete, check every inbound relation's `onDelete`.** An absent `onDelete`
+  is not "no behaviour" — Prisma defaults to `SetNull` for optional relations. Hard-deleting a
+  `Payment` would cascade away its proof-of-payment documents *and* NULL `paymentId` on its
+  append-only `verificationEvents`.
+- **Adding a `deletedAt` column is a sweep of every existing reader, not a new field.** Nested
+  `include`s need their own `where`, aggregates need it in both directions, and a
+  `findUnique({ where: { id } })` must become `findFirst` to take the filter at all. A miss fails
+  silently and in the worst direction. See
+  `docs/solutions/architecture-patterns/soft-delete-and-the-append-only-audit-trail.md`.
+
 ---
 
 ## CI/CD

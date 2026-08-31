@@ -9,10 +9,13 @@ const ORG_COUNTS = {
   _count: {
     select: {
       userProfiles: true,
-      customers: true,
-      quotations: true,
-      invoices: true,
-      payments: true,
+      // Filtered counts, so a soft-deleted row stops being counted. `customers` and
+      // `invoices` were already counting deleted rows before quotations and payments
+      // gained `deletedAt`; corrected here rather than leaving two of the four wrong.
+      customers: { where: { deletedAt: null } },
+      quotations: { where: { deletedAt: null } },
+      invoices: { where: { deletedAt: null } },
+      payments: { where: { deletedAt: null } },
     },
   },
 } as const;

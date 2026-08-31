@@ -1,6 +1,7 @@
 import { DocumentKind, VerificationStatus } from '@prisma/client';
 import { prisma } from '../../config/prisma';
 import { liveDocumentFilter } from '../documents/service';
+import { livePaymentFilter } from '../payments/service';
 
 export interface StatementQuery {
   customerId?: string;
@@ -78,6 +79,7 @@ export async function getStatement(
   const payments = await prisma.payment.findMany({
     where: {
       organisationId,
+      ...livePaymentFilter,
       verificationStatus: VerificationStatus.VERIFIED,
       paidAt: { gte: from, lte: to },
       ...(query.customerId ? { invoice: { customerId: query.customerId } } : {}),

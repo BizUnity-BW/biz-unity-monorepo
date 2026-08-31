@@ -89,6 +89,10 @@ enum VerificationEventType {
   POP_REMOVED
   PAYMENT_VERIFIED
   PAYMENT_REJECTED
+  /// A payment reversed via soft delete. Appended, never replacing PAYMENT_RECORDED —
+  /// the trail must show that money was recorded and then taken back, not that it was
+  /// never there.
+  PAYMENT_REVERSED
   DOCUMENT_UPLOADED
   DOCUMENT_REMOVED
   DOCUMENT_VERIFIED
@@ -185,6 +189,7 @@ model Quotation {
   convertedAt   DateTime?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
+  deletedAt     DateTime?
 
   organisationId String
   organisation   Organisation @relation(fields: [organisationId], references: [id])
@@ -270,6 +275,14 @@ model Payment {
   notes       String?
   paidAt      DateTime
   createdAt   DateTime      @default(now())
+
+  /// Soft delete, so reversing a mistakenly-recorded payment cannot destroy evidence.
+  /// A hard delete would cascade away the proof-of-payment `documents` (leaving their
+  /// storage objects orphaned) and NULL the `paymentId` on this payment's
+  /// `verificationEvents` — mutating rows the audit trail forbids touching.
+  /// Every read of a payment must therefore filter on `livePaymentFilter`; the paid
+  /// total on the invoice aggregates live payments only.
+  deletedAt DateTime?
 
   /// Whether a platform admin has independently verified this payment against an
   /// attached proof of payment. Deliberately separate from the invoice's own

@@ -24,5 +24,11 @@ router.patch(
   requireOrgRole(OrgRole.OWNER, OrgRole.MANAGER),
   controller.updateStatus,
 );
+// Registered after `/:id/status` — Express matches in order, and `/:id` would otherwise
+// swallow the status route.
+router.patch('/:id', requireOrgRole(OrgRole.OWNER, OrgRole.MANAGER), controller.update);
+// OWNER only, stricter than the quotation equivalent: deleting an invoice is the one
+// destructive act on a financial document the spec does not delegate to a MANAGER.
+router.delete('/:id', requireOrgRole(OrgRole.OWNER), controller.remove);
 
 export default router;
